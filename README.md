@@ -22,11 +22,11 @@
 
 Requesting execution on NVIDIA's Deep Learning Accelerator does not mean getting it: TensorRT will compile a DLA engine and silently leave every unsupported region on the GPU. This work asks what it costs to run a modern detector *entirely* on that constrained accelerator, and where the cost falls.
 
-Making YOLO11 fully DLA-admissible takes two localized changes — `C2DLA` replaces spatial self-attention with a channel softmax and a depthwise convolution, and `DetectDLA` exports three static raw prediction maps instead of a decoded tensor — after which fallback-disabled compilation and engine inspection confirm **one DLA loadable with no GPU-assigned learned layer**, in FP16 and in mixed INT8, on a Jetson AGX Orin with TensorRT 10.3.
+Making YOLO11 fully DLA-admissible takes two localized changes. `C2DLA` replaces spatial self-attention with a channel softmax and a depthwise convolution, and `DetectDLA` exports three static raw prediction maps instead of a decoded tensor. Fallback-disabled compilation and engine inspection then confirm one DLA loadable with no GPU-assigned learned layer, in FP16 and in mixed INT8, on a Jetson AGX Orin with TensorRT 10.3.
 
-The answer is that it is not free, and the reason is not the accelerator. In INT8 the **inference stage is faster on strict DLA than on the same network on GPU — 4.522 against 6.400 ms** — but the native-layout boundaries around it cost 7.463 ms on the input and 10.729 ms on the output, each more than the inference itself. The application pipeline therefore ends up slower and slightly more energy-hungry than the GPU configuration. Boundary cost becomes the binding constraint precisely when the accelerator succeeds.
+It is not free, and the cost is not in the accelerator. In INT8 the inference stage is faster on strict DLA than on the same network on GPU, 4.522 against 6.400 ms, but the native-layout boundaries around it take 7.463 ms on the input and 10.729 ms on the output, each longer than the inference itself. The application pipeline ends up slower and slightly more energy-hungry than the GPU configuration. Boundary cost becomes the binding constraint precisely when the accelerator succeeds.
 
-This repository holds what is needed to reproduce that: the export, TensorRT build and calibration tooling, the measurement harness for accuracy, latency and module energy, the trained weights, and the audited record behind every number — each summary hash-linked to the raw artifact it came from. The manuscript itself is not here. Users of this work should cite:
+This repository holds the trained weights and the code to export them, build the TensorRT engines, calibrate INT8, and measure accuracy, latency and module energy. Users of this work should cite:
 
 ```bibtex
 @unpublished{anonymous2026yolo11dla,
@@ -48,7 +48,7 @@ This guide treats the repository root as the workspace. Run every command below 
 - [4. Export and build the engines](#4-export-and-build-the-engines)
 - [5. Verify the placement](#5-verify-the-placement)
 - [6. Results](#6-results)
-- [7. Reproducing the paper](#7-reproducing-the-paper)
+- [7. Reproducing the measurements](#7-reproducing-the-measurements)
 - [Evidence](#evidence)
 - [Repository layout](#repository-layout)
 
@@ -59,31 +59,18 @@ git clone https://anonymous.4open.science/r/yolo11_dla
 cd yolo11_dla
 ```
 
-The model itself is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics) and lives in a companion repository — `C2DLA`, `DetectDLA`, the `yolo11-dla` configuration and the host-side decoder, 229 added lines over upstream `a462bb65`. Clone it where the tooling expects it and put that path on `PYTHONPATH`:
+The model is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics) and lives in a companion repository: `C2DLA`, `DetectDLA`, the `yolo11-dla` configuration and the host-side decoder, 418 added lines over upstream `a462bb65`. Clone it where the tooling expects it and put that path on `PYTHONPATH`:
 
 ```bash
 git clone https://anonymous.4open.science/r/ultralytics-dla tools/ultralytics
 export PYTHONPATH="$PWD/tools/ultralytics${PYTHONPATH:+:$PYTHONPATH}"
 ```
 
-[`docs/MODEL_PATCH.md`](docs/MODEL_PATCH.md) documents that patch change by change, including what was deliberately left out, so it can also be reapplied to a plain upstream checkout. Reading the documentation and re-deriving the result tables do not need the fork at all.
-
 ## 2. Install the dependencies
 
-Three levels of dependency, depending on how far you want to go. Reading the protocol and the audited record needs nothing at all; re-deriving the summary tables from a campaign's raw records needs Python and NumPy; running anything that loads an engine needs the target board.
+Reading the documentation needs nothing. Re-deriving the result tables from the measurement records needs Python 3 and NumPy. Exporting, building engines, calibrating and measuring needs the target board: a Jetson with TensorRT, plus OpenCV, pycocotools and the Ultralytics fork.
 
-The measurements ran inside a JetPack 6 container on the board, with the repository bind-mounted into it. `tegrastats` is not present in that image, so the energy campaigns used a copy of the host binary passed explicitly with `--tegrastats`; see [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
-
-| Task | Needs |
-| --- | --- |
-| Read the protocol and the audited record | nothing |
-| Re-derive result tables from the raw records | Python 3, [NumPy](https://numpy.org) |
-| Regenerate the audit figures | plus [Matplotlib](https://matplotlib.org) |
-| Re-extract the checkpoint history, verify the export | plus [PyTorch](https://pytorch.org), [ONNX](https://onnx.ai) and ONNX Runtime |
-| Run the test suite | [pytest](https://docs.pytest.org) |
-| Export, build, calibrate, measure | a Jetson with TensorRT, [OpenCV](https://opencv.org), [pycocotools](https://github.com/ppwwyyxx/cocoapi) and the Ultralytics fork |
-
-The measured stack is L4T 36.4.4, CUDA 12.6, TensorRT 10.3.0.30, cuDNN 9.3.0, PyTorch 2.5.0a0, Python 3.10.12, ROS 2 Jazzy, in NVIDIA's 50 W power mode with `jetson_clocks` disabled. Full details, including the power-rail topology, are in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
+Everything was measured on a Jetson AGX Orin Developer Kit with L4T 36.4.4, CUDA 12.6, TensorRT 10.3.0, PyTorch 2.5.0a0 and Python 3.10.12, in NVIDIA's 50 W power mode with `jetson_clocks` disabled, inside a JetPack 6 container. `tegrastats` is not in that image, so the energy runs take it as an explicit `--tegrastats` path. Power rails, container details and the full package list are in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
 
 ## 3. What the model changes
 
@@ -101,7 +88,7 @@ YOLO11-n's convolutional stem, `C3k2` stages, SPPF, feature-pyramid connections 
 
 **`Detect → DetectDLA`** exports, per pyramid level, the concatenation of the regression and classification towers as a static `1×144×H×W` map at strides 8, 16 and 32, instead of a decoded `1×84×8400` tensor. The DFL expectation, grid decoding, sigmoid, confidence filtering and variable-cardinality NMS all move to the host. During training and ordinary PyTorch inference the inherited `Detect` path still runs, so losses and assignment are unchanged.
 
-Moving the boundary earlier is what makes the graph admissible, and it is also what the third result is about: at FP16 the three raw maps carry 2,419,200 bytes against 1,411,200 for the stock output, a factor of 1.714, and the host then has to pack, unpack and convert them. The decoder recovers part of the cost by filtering on confidence **before** the DFL expectation, which drops the regression work from `O(4rN)` to `O(4rm)` over surviving anchors — median 28.5 of 8,400 in the FP16 10 Hz test — without reducing transfer volume.
+Moving the boundary earlier is what makes the graph admissible, and it is also where the cost appears. At FP16 the three raw maps carry 2,419,200 bytes against 1,411,200 for the stock output, a factor of 1.714, and the host then has to pack, unpack and convert them. The decoder recovers part of the cost by filtering on confidence **before** the DFL expectation, which drops the regression work from `O(4rN)` to `O(4rm)` over surviving anchors — median 28.5 of 8,400 in the FP16 10 Hz test — without reducing transfer volume.
 
 ## 4. Export and build the engines
 
@@ -143,7 +130,7 @@ A successful build proves nothing: `--allowGPUFallback` also succeeds, by partit
 | YOLO11-n / DLA+GPU | INT8 | 4 | 34, of which 23 reformat |
 | **YOLO11-DLA-n / DLA** | INT8 | **1** | **0** |
 
-The FP16 strict build assigns 299 layers to DLA and none to GPU; the INT8 strict build assigns 298 layers to INT8 and one softmax to FP16, all of them on DLA — fallback-free is not the same as integer-only, and the mixed precision stays entirely inside the loadable. The verdicts are read from the inspector output that `--exportLayerInfo` writes next to each engine, and the rejection of the stock strict build is preserved in its own build log; the audited FP16 summary is tracked in [`analysis/engine_summary.csv`](analysis/engine_summary.csv).
+The FP16 strict build assigns 299 layers to DLA and none to GPU; the INT8 strict build assigns 298 layers to INT8 and one softmax to FP16, all of them on DLA, so fallback-free is not the same as integer-only and the mixed precision stays inside the loadable. The verdicts are read from the inspector output that `--exportLayerInfo` writes next to each engine, and the rejection of the stock strict build is preserved in its own build log; the audited FP16 summary is tracked in [`analysis/engine_summary.csv`](analysis/engine_summary.csv).
 
 ## 6. Results
 
@@ -160,7 +147,7 @@ Jetson AGX Orin, batch one, 640×640, 50 W, `jetson_clocks` disabled. `DLA` mean
 
 Placement costs **0.003 AP** in FP16 and **0.543 AP** in INT8 against the same network on GPU, while the precision change costs 2.468 points: the regime, not the placement, dominates the accuracy loss. The stock fallback's collapse to 19.827 AP under INT8 is reported as measured; these tests do not isolate its cause, and the ordering cannot be assumed for other quantization setups.
 
-**Latency**, at two boundaries. `trtexec` engine-plus-transfer over 30 s, and the full application pipeline — preprocessing, native I/O, inference, decode and NMS over 100 preloaded images for 60 s:
+**Latency**, at two boundaries: `trtexec` engine-plus-transfer over 30 s, and the full application pipeline (preprocessing, native I/O, inference, decode and NMS) over 100 preloaded images for 60 s.
 
 | Model | Device | Mode | Engine median | P95 | Application median | P95 |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -183,7 +170,7 @@ INT8 cuts strict DLA engine latency by **6.60×**, from 27.515 to 4.167 ms, and 
   <em>Where the time actually goes. Panels use different horizontal scales.</em>
 </p>
 
-The stage breakdown is the point of the paper. In INT8 the **inference stage is faster on strict DLA (4.522 ms) than on the adapted GPU engine (6.400 ms)** — the accelerator wins the part it is responsible for. But the native-layout input boundary costs 7.463 ms and the output boundary 10.729 ms, each more than the inference itself, against 1.693 and 1.972 ms for the GPU engine's linear bindings. At FP16 the 27.781 ms inference stage dominated its boundaries and hid them; at INT8 it no longer does. The layout requirement is structural; the magnitude of the packing and unpacking overhead is specific to this host implementation.
+The stage breakdown is the result. In INT8 the inference stage is faster on strict DLA (4.522 ms) than on the adapted GPU engine (6.400 ms): the accelerator wins the part it is responsible for. The native-layout input boundary then costs 7.463 ms and the output boundary 10.729 ms, each longer than the inference itself, against 1.693 and 1.972 ms for the GPU engine's linear bindings. At FP16 the 27.781 ms inference stage dominated its boundaries and hid them; at INT8 it no longer does. The layout requirement is structural, while the size of the packing and unpacking overhead is specific to this host implementation.
 
 **Module energy**, same 100-image cycle released at 10 Hz for 60 s, 600 frames per configuration with no drop and no miss of the 100 ms deadline, integrating `VDD_GPU_SOC + VDD_CPU_CV + VIN_SYS_5V0`:
 
@@ -194,7 +181,7 @@ The stage breakdown is the point of the paper. In INT8 the **inference stage is 
 | YOLO11-DLA-n | GPU | 0.761 | 0.060 | 0.760 | 0.060 |
 | YOLO11-DLA-n | DLA | 0.874 | 0.174 | 0.806 | 0.106 |
 
-Strict INT8 is 7.7% below strict FP16 but 6.1% above the same model on GPU, and slightly above its own fallback counterpart — whose accuracy is 15 AP lower. This is module power over three rails, covering the CPU stages around the accelerator, not a measurement of DLA core efficiency.
+Strict INT8 is 7.7% below strict FP16 but 6.1% above the same model on GPU, and slightly above its own fallback counterpart, whose accuracy is 15 AP lower. This is module power over three rails, covering the CPU stages around the accelerator, not a measurement of DLA core efficiency.
 
 <p align="center">
   <img src="docs/img/deployment_tradeoffs.png" alt="Held-out AP against application latency and module energy for all eight configurations" width="880"/>
@@ -206,9 +193,9 @@ Strict INT8 is 7.7% below strict FP16 but 6.1% above the same model on GPU, and 
 
 **What this does not show.** No concurrent GPU workload was measured, so nothing here supports a claim that freeing GPU compute helps another robotic task: strict-DLA traces still reach 7–10% GR3D utilization, and the strict configuration occupies the platform *longer* per frame, so a system-level test with a competing workload is required before any such benefit is claimed. Evidence covers one board, one TensorRT version, one nano detector, 640×640, batch one, and one launch per configuration, so percentiles describe frames within a test and not variability across runs. The exploratory raw GPU/DLA output comparison **fails** its tolerance gate in both precisions and is reported as a diagnostic. Every number, its source file and its caveat are in [`docs/RESULTS.md`](docs/RESULTS.md) and [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
 
-## 7. Reproducing the paper
+## 7. Reproducing the measurements
 
-The published numbers are collected from the measured summaries, not typed. With a campaign present under `logs/`, the whole chain from raw per-frame records to the audited record runs locally:
+The reported values are collected from the measurement records, not typed in. With a campaign under `logs/`, the chain from raw per-frame records to the summaries runs locally:
 
 ```bash
 # re-derive a results table from the raw per-frame records, and check it against the campaign summary
@@ -225,9 +212,7 @@ python tools/experiments/run.py audit
 python -m pytest tools/experiments/tests -q
 ```
 
-That re-derivation reproduces byte-identically for the pipeline, energy and microbenchmark stages. The accuracy stages are the exception: `summarize` reads their bulk per-image records, but each job's own `manifest.json` carries the full COCOeval metrics, the engine hash, the annotation hash and the evaluated image IDs, so every accuracy row stays checkable without them.
-
-Without a campaign, the audited record is still tracked: [`analysis/`](analysis/) holds the summaries the published numbers were taken from, each with the SHA-256 of the raw file it came from, so they can be tied to a future re-run.
+`summarize` reproduces the pipeline, energy and microbenchmark tables byte for byte. It cannot re-aggregate the accuracy stages without their per-image records, but each job's `manifest.json` carries its COCOeval metrics, engine hash, annotation hash and image IDs.
 
 On the board, the five measurement stages run from an already-built engine set and never rebuild one:
 
@@ -244,24 +229,13 @@ python "$PAPER_TOOLS/run.py" energy   --engines "$ENG" --images "$COCO_VAL" --an
        --limit 100 --fps 10 --duration 60 --repeats 1 --tegrastats /tmp/tegrastats-paper --power-profile agx-orin
 ```
 
-Every stage wants a **new** output directory, has no resume, verifies engine hashes before measuring, and accepts `--dry-run` to print its command list without importing CUDA. The full protocol, with the thresholds that differ between the accuracy and the application settings, is in [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md).
+Every stage needs a new output directory, has no resume, verifies engine hashes before measuring, and accepts `--dry-run`. The full protocol is in [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md).
 
 ## Evidence
 
-Engines and measurement artifacts live under `logs/`, which is **not tracked** — the two campaigns are about 164 MB, and the per-image COCO prediction dumps behind them are several gigabytes more. [`logs/README.md`](logs/README.md) documents what every stage expects there and what it writes.
+Models are in [`weights/`](weights/), measurement output goes to `logs/`, and [`analysis/`](analysis/) holds the audited summaries the published numbers were taken from, each recording the SHA-256 of the file it was computed from.
 
-What the repository does carry is the trained model in [`weights/`](weights/) and the **derived** record in [`analysis/`](analysis/), each file hash-linked to the raw artifact it was computed from:
-
-| File | Contents |
-| --- | --- |
-| `precision_results.json` | every published accuracy, latency and energy figure, with the SHA-256 of the eight campaign CSVs it was taken from |
-| `engine_summary.csv` | the audited FP16 engine summary: 20,167 timing samples, engine sizes, DLA loadables, GPU and reformat node counts |
-| `layer_profile.csv`, `fp16_audit.json` | the per-layer FP16 profile and the full raw-log audit |
-| `checkpoint_training.json`, `.csv` | the training configuration and the 500-epoch history read back from the checkpoint, with its SHA-256 |
-| `model_verification.json` | the deterministic CPU ONNX and decoder verification, with operator counts and errors |
-| `audits/` | long-form evidence, model and precision audits, preserved verbatim |
-
-The chain from weights to measured engine is stated as hashes across these files and reproduced by each campaign's own manifests: the checkpoint hash appears in the training extract, the ONNX hash in the calibration manifests, the cache hash in the quantization sidecar, and the engine hash in every measurement manifest and accuracy summary. A re-run that lands on the same hashes is measuring the same artifacts.
+The hash chain runs from the checkpoint to the measured engine: the checkpoint hash is in the training extract, the ONNX hash in the calibration manifests, the cache hash in the quantization sidecar, and the engine hash in every measurement manifest. A re-run that lands on the same hashes is measuring the same artifacts.
 
 ## Repository layout
 

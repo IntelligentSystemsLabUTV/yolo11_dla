@@ -2,7 +2,7 @@
 
 ## Where the code lives
 
-YOLO11-DLA is a patch to Ultralytics, not a separate codebase. The applied result is the companion repository at <https://anonymous.4open.science/r/ultralytics-dla>, which the tooling expects at `tools/ultralytics/`. [`MODEL_PATCH.md`](MODEL_PATCH.md) contains every change required to reproduce it from upstream revision `a462bb65` — the three new blocks, the head, the model YAML, the host decoder, and the export, backend and post-processing hooks — with the parts belonging to other experiments explicitly excluded.
+YOLO11-DLA is a patch to Ultralytics, not a separate codebase. It lives in the companion repository at <https://anonymous.4open.science/r/ultralytics-dla>, which the tooling expects at `tools/ultralytics/`: 418 added lines over upstream revision `a462bb65`, listed below.
 
 | Upstream file | Change |
 |---|---|
@@ -14,7 +14,7 @@ YOLO11-DLA is a patch to Ultralytics, not a separate codebase. The applied resul
 | `ultralytics/engine/exporter.py`, `nn/backends/base.py` | binding names and typed export metadata |
 | `ultralytics/models/yolo/detect/{predict,val}.py`, `utils/nms.py` | route raw outputs through the decoder; fix a six-candidate NMS ambiguity |
 
-Cloning that repository to `tools/ultralytics/`, or applying the patch to a plain upstream checkout there, and putting the path on `PYTHONPATH` is all the experiment tooling needs.
+Cloning that repository to `tools/ultralytics/` and putting the path on `PYTHONPATH` is all the experiment tooling needs.
 
 ## Why stock YOLO11n cannot be placed on DLA
 

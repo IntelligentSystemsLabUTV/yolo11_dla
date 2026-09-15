@@ -132,7 +132,7 @@ A campaign already collected with a single `--rail` can be recomputed as module 
 
 ## Aggregation rules
 
-`summarize` reads a stage directory and writes `results.csv`, `report.json` and, for energy, `energy_rails.csv`, keeping individual launches distinct. It verifies the hashes of archived evidence, refuses to aggregate AP across runs with different images, hashes or thresholds, does not treat thousands of frames as independent replicates, and does not merge separate campaigns. No script writes numbers into the manuscript; the tables are generated explicitly, see [`RESULTS.md`](RESULTS.md).
+`summarize` reads a stage directory and writes `results.csv`, `report.json` and, for energy, `energy_rails.csv`, keeping individual launches distinct. It verifies the hashes of archived evidence, refuses to aggregate AP across runs with different images, hashes or thresholds, does not treat thousands of frames as independent replicates, and does not merge separate campaigns. The reported values are collected from these summaries by `run.py collect-results`, see [`RESULTS.md`](RESULTS.md).
 
 ## What was deliberately not measured
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One entry point for the paper scripts; forwards arguments without a shell."""
+"""One entry point for the experiment scripts; forwards arguments without a shell."""
 from pathlib import Path
 import os
 import sys

@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Collect the audited FP16/INT8 result record from the measured campaign summaries.
-
-Reads the per-stage `results.csv` files produced by `run.py summarize`, records the
-SHA-256 of every source it read, and writes `analysis/precision_results.json`. This is
-the machine-readable link between a published number and the run that produced it; it
-performs no inference, no engine build and no re-measurement.
-"""
+"""Record the FP16/INT8 results from the stage summaries; never runs a measurement."""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -35,8 +29,7 @@ def main():
               'INT8': rows(iq / 'energy-summary/results.csv')}
     micro = {'INT8': rows(iq / 'micro-summary/results.csv')}
 
-    # The FP16 microbenchmark was not re-run: it is the audited summary of the four
-    # historical trtexec traces, keyed by their original engine identifiers.
+    # FP16 timing comes from the audited historical traces, keyed by engine identifier.
     ids = {'stock-gpu': 'yolo11n-gpu-fp16', 'adapted-gpu': 'yolo11n-dla-gpu-fp16',
            'stock-fallback': 'yolo11n-dla-gpu-fallback-fp16',
            'adapted-strict': 'yolo11n-dla-strict-dla-fp16'}
