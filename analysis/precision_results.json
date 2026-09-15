@@ -7,7 +7,7 @@
     "logs/icra2027_final/run_01/summary-energy-10hz-module/results.csv": "6b34585ab60816dc4b8576c21acc4167623323187e2abc936a3315f0ff92b715",
     "logs/icra2027_int8/run_01/energy-summary/results.csv": "3235bbebeda985eca0ee1960798f2d2d529d23f05309bc1698ee925a5cb5ee95",
     "logs/icra2027_int8/run_01/micro-summary/results.csv": "03a927a1490511c6a56c3397e2e2851d5d5bcf2bbc87c02fa556abd3e8b4d244",
-    "tools/paper/analysis/engine_summary.csv": "e684a93e9e40eddf1e58ff75d7d0a6eb820bfcf611ea61ce47b613473d6d53b0"
+    "analysis/engine_summary.csv": "e684a93e9e40eddf1e58ff75d7d0a6eb820bfcf611ea61ce47b613473d6d53b0"
   },
   "accuracy": {
     "FP16": {

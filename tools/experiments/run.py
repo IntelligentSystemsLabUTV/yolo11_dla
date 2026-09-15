@@ -22,7 +22,7 @@ COMMANDS = {
     'summarize': ('analysis/summarize.py',),
     'audit': ('analysis/analyze_fp16.py',),
     'extract-checkpoint': ('analysis/extract_checkpoint.py',),
-    'check-paper': ('paper/check_paper.py',),
+    'collect-results': ('analysis/collect_results.py',),
     'train': ('training/train_coco_dla.py',),
     'recover-commands': ('history/recover_commands.py',),
 }

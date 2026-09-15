@@ -2,7 +2,7 @@
 
 **This directory is not tracked.** `logs/.gitignore` ignores everything here except this page. It is the working directory where the models, the engines and every measurement campaign live, on the machine that runs them.
 
-The repository ships the code, the protocol and the **derived** record the manuscript is built from — `tools/paper/analysis/` holds the audited CSV/JSON with the SHA-256 of each raw source. The raw artifacts described below are produced by the commands in [`../docs/EXPERIMENTS.md`](../docs/EXPERIMENTS.md) and are not carried in git.
+The repository ships the code, the protocol and the **derived** record the published numbers come from — `analysis/` holds the audited CSV/JSON with the SHA-256 of each raw source. The raw artifacts described below are produced by the commands in [`../docs/EXPERIMENTS.md`](../docs/EXPERIMENTS.md) and are not carried in git.
 
 ## What the scripts expect to find here
 

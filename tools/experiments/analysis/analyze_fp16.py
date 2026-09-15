@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit supplied YOLO11 FP16 logs and regenerate the manuscript figures.
+"""Audit supplied YOLO11 FP16 logs and regenerate the audit figures.
 
 The original logs are read only. All summary data are parsed from source files,
 not copied from the manuscript. This is an audit, not a benchmark execution.
@@ -9,7 +9,7 @@ from __future__ import annotations
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
-from _paths import WORKSPACE, PAPER
+from _paths import WORKSPACE, ARTIFACTS
 
 
 import argparse
@@ -267,8 +267,8 @@ def training_figure(path, directory):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--logs", type=Path, default=WORKSPACE / "logs/fp16_matrix")
-    parser.add_argument("--output", type=Path, default=PAPER / "analysis")
-    parser.add_argument("--figures", type=Path, default=PAPER / "figures")
+    parser.add_argument("--output", type=Path, default=ARTIFACTS)
+    parser.add_argument("--figures", type=Path, default=ARTIFACTS / "figures")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     args.figures.mkdir(parents=True, exist_ok=True)

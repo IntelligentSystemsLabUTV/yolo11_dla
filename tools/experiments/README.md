@@ -1,6 +1,6 @@
 # Experiment and analysis tooling
 
-Every script used to export, build, calibrate, verify, measure, summarize and audit YOLO11-DLA-n, with stock YOLO11n as the baseline. The model code itself stays in the Ultralytics fork at `../ultralytics/`; the manuscript is in `../paper/`; datasets, checkpoints, engines and measurements are not duplicated here.
+Every script used to export, build, calibrate, verify, measure, summarize and audit YOLO11-DLA-n, with stock YOLO11n as the baseline. The model code itself stays in the Ultralytics fork at `../ultralytics/` and the trained weights in `../../weights/`; datasets, engines and measurements are not duplicated here.
 
 Read [`../../docs/EXPERIMENTS.md`](../../docs/EXPERIMENTS.md) for the protocol and the exact commands of both campaigns, and [`../../docs/BUILD.md`](../../docs/BUILD.md) for export and TensorRT builds.
 
@@ -35,7 +35,7 @@ python tools/experiments/run.py COMMAND [arguments]
 | `e2e` | `benchmarks/yolo_e2e_tester.py` | Single-sequence end-to-end tester |
 | `audit` | `analysis/analyze_fp16.py` | Audit the raw FP16 `trtexec` traces and regenerate the audit CSV/JSON and figures |
 | `extract-checkpoint` | `analysis/extract_checkpoint.py` | Re-extract the checkpoint's training history and metadata |
-| `check-paper` | `paper/check_paper.py` | PDF and TeX preflight |
+| `collect-results` | `analysis/collect_results.py` | Rebuild the audited result record from the campaign summaries |
 | `train` | `training/train_coco_dla.py` | The trainer used for the released checkpoint |
 | `recover-commands` | `history/recover_commands.py` | Rebuild the command archive from preserved logs and attachments |
 
@@ -54,7 +54,6 @@ tools/experiments/
 ├── analysis/              log audit, checkpoint history, CSV/figure/summary generation
 ├── training/              trainer and historical start/resume/stop control
 │   └── monitoring/        Weights & Biases sync and results server
-├── paper/                 manuscript preflight and table/figure generation
 ├── configs/               hardware notes template
 ├── tests/                 software regression suite
 └── history/               command archive, provenance, recovered terminal sources
@@ -72,6 +71,6 @@ The test suite is host-side only: it covers NMS edge cases, packing and padding 
 
 ## Two cautions
 
-`training/` also retains options for other scales, tasks and model families, because the trainer is shared. **They are not part of the paper's matrix**, which is exactly stock YOLO11n and YOLO11-DLA-n. The trainer keeps its original run paths, resume behaviour and Weights & Biases settings: do not start a new training run with it before separating the output directory and the run ID.
+`training/` also retains options for other scales, tasks and model families, because the trainer is shared. **They are not part of the measured matrix**, which is exactly stock YOLO11-n and YOLO11-DLA-n. The trainer keeps its original run paths, resume behaviour and Weights & Biases settings: do not start a new training run with it before separating the output directory and the run ID.
 
 `history/` is a provenance archive, not a list of commands to execute blindly. It preserves original paths faithfully — including ones that no longer resolve — and the current runtime includes fixes made after some of those measurements were taken.

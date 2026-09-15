@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-from _paths import ROOT, WORKSPACE, PAPER
+from _paths import ROOT, WORKSPACE
 HERE = ROOT
 # A measurement run must not silently change the Python environment during export.
 os.environ['YOLO_AUTOINSTALL'] = 'false'
@@ -61,8 +61,7 @@ def provenance():
             record['package_versions'][package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
             record['package_versions'][package] = 'not in Python distribution metadata; see system queries'
-    for name, repo in [('workspace', WORKSPACE), ('ultralytics', WORKSPACE/'tools/ultralytics'),
-                       ('paper', PAPER)]:
+    for name, repo in [('workspace', WORKSPACE), ('ultralytics', WORKSPACE/'tools/ultralytics')]:
         record[name] = {key: capture(['git', '-C', str(repo), *args]) for key, args in
                         [('revision', ['rev-parse', 'HEAD']), ('status', ['status', '--short']),
                          ('diff', ['diff', 'HEAD'])]}

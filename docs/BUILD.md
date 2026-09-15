@@ -25,7 +25,7 @@ The artifacts every engine in the paper was built from are identified by the **a
 
 The two files under `weights/` are the as-built artifacts with the local filesystem paths and repository URL recorded inside them replaced by `<redacted>`, which is why their file hashes differ. Nothing else was changed, and that is checkable: the ONNX graph is bit-identical (`sha256(graph.SerializeToString())` = `c15763f5fa8e56fc0d4cc71424dc3c50…` before and after), every ONNX metadata key is preserved, and the checkpoint's parameters are bit-identical (`sha256` over the sorted `state_dict` tensor bytes = `94e3df7af25b7d803c59255c174b1c4d…` before and after). Compare those two invariants, not the file hashes, when checking a copy against the record.
 
-The adapted ONNX graph contains 89 `Conv`, 76 `Sigmoid`, 76 `Mul`, 9 `Split`, 14 `Add`, 20 `Concat`, 3 `MaxPool`, 2 `Resize` and one `Softmax`. It contains **no** `MatMul`, `Gemm`, `Reshape`, `Transpose`, `Div` or `Slice`. The Sigmoid/Mul pairs are the retained SiLU activations; these are pre-fusion node counts, not execution kernels. Source: [`../tools/paper/analysis/model_verification.json`](../tools/paper/analysis/model_verification.json), regenerable with `python tools/experiments/run.py check-model`.
+The adapted ONNX graph contains 89 `Conv`, 76 `Sigmoid`, 76 `Mul`, 9 `Split`, 14 `Add`, 20 `Concat`, 3 `MaxPool`, 2 `Resize` and one `Softmax`. It contains **no** `MatMul`, `Gemm`, `Reshape`, `Transpose`, `Div` or `Slice`. The Sigmoid/Mul pairs are the retained SiLU activations; these are pre-fusion node counts, not execution kernels. Source: [`../analysis/model_verification.json`](../analysis/model_verification.json), regenerable with `python tools/experiments/run.py check-model`.
 
 The same record holds the deterministic CPU checks on one random input (seed 7): the external host decoder reproduces the inherited `Detect` output to a maximum absolute difference of 1.22×10⁻⁴, and ONNX Runtime reproduces the checkpoint's raw maps to 3.07×10⁻⁴. These are CPU export checks; they say nothing about TensorRT or DLA numerics.
 
@@ -114,7 +114,7 @@ Evidence: `logs/fp16_matrix/*.layers.json` and `logs/int8_matrix/**/*.layers.jso
 
 Two cautions carried into the paper. First, this is configuration-specific: TensorRT's DLA softmax support depends on target and shape, and the compiler warns that the selected approximation can introduce numerical error. A source rewrite that compiles on this Orin/TensorRT pair is not evidence for another DLA generation, input size or precision. Second, a successful build does not validate the decoding of the raw outputs — that is checked separately, on the board, by `parity`.
 
-The FP16 separate layer profile (a distinct `trtexec` run, not the timing run) attributes 93.97% of stock fallback time to DLA, 4.73% to reformats and 1.30% to GPU compute, summing to 34.312 ms of device profile with 32.244 ms inside DLA segments. It is FP16-only and is plotted in `tools/paper/figures/fallback_profile.pdf`; the per-layer table is [`../tools/paper/analysis/layer_profile.csv`](../tools/paper/analysis/layer_profile.csv).
+The FP16 separate layer profile (a distinct `trtexec` run, not the timing run) attributes 93.97% of stock fallback time to DLA, 4.73% to reformats and 1.30% to GPU compute, summing to 34.312 ms of device profile with 32.244 ms inside DLA segments. It is FP16-only and is plotted in the FP16 placement profile; the per-layer table is [`../analysis/layer_profile.csv`](../analysis/layer_profile.csv).
 
 ## INT8 calibration
 

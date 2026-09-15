@@ -143,7 +143,7 @@ serialized TensorRT engine.
 ## Recovery update — 2026-09-09
 
 The August 25 conversation attachments were recovered and archived under
-[../../yolo11_dla_paper/history/sources/](../../experiments/history/sources/index.json).
+[../../yolo11_dla_paper/history/sources/](../../tools/experiments/history/sources/index.json).
 The final E2E terminal output directly confirms all four YOLO11-family summary
 rows, including strict median 56.497 ms and fallback median 52.782 ms, and records
 the strict input CHW4/output CHW16 formats with context strides. This updates
@@ -152,4 +152,4 @@ records are now available. The per-frame JSON arrays remain missing; no repeated
 experiment, new confidence interval, engine hash chain or dataset AP was recovered.
 The earlier 20/200 default-stream/dense runs are archived separately from the
 later 10/100 runs with sparse decoding for the adapted model. See
-[HISTORICAL_COMMANDS.md](../../../docs/PROVENANCE.md).
+[HISTORICAL_COMMANDS.md](../../docs/PROVENANCE.md).

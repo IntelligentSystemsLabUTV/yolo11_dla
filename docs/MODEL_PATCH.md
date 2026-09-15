@@ -583,4 +583,4 @@ print(sum(p.numel() for p in m.parameters()), 'parameters')  # expect 2615696
 "
 ```
 
-Then export and check the operator contract: the graph must contain **no** `MatMul`, `Gemm`, `Reshape`, `Transpose`, `Div` or `Slice`, and exactly one `Softmax`. The reference counts for the released model are 89 `Conv`, 76 `Sigmoid`, 76 `Mul`, 9 `Split`, 14 `Add`, 20 `Concat`, 3 `MaxPool`, 2 `Resize`, 1 `Softmax`, with outputs `pred_p3/p4/p5` at `1×144×{80,40,20}²`. `python tools/experiments/run.py check-model` performs exactly this check and writes [`../tools/paper/analysis/model_verification.json`](../tools/paper/analysis/model_verification.json).
+Then export and check the operator contract: the graph must contain **no** `MatMul`, `Gemm`, `Reshape`, `Transpose`, `Div` or `Slice`, and exactly one `Softmax`. The reference counts for the released model are 89 `Conv`, 76 `Sigmoid`, 76 `Mul`, 9 `Split`, 14 `Add`, 20 `Concat`, 3 `MaxPool`, 2 `Resize`, 1 `Softmax`, with outputs `pred_p3/p4/p5` at `1×144×{80,40,20}²`. `python tools/experiments/run.py check-model` performs exactly this check and writes [`../analysis/model_verification.json`](../analysis/model_verification.json).

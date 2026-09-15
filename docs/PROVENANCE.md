@@ -34,7 +34,7 @@ logs/int8_matrix/debug-strict-native-int8.gKgeWc/adapted-strict-int8.engine   fd
 logs/icra2027_int8/run_01/*/manifest.json + accuracy-summary/results.csv   artifact_sha256 fd530775…
 ```
 
-The eight CSVs behind the manuscript tables are hash-recorded in `tools/paper/analysis/precision_results.json`, which is tracked; the CSVs themselves are campaign output under the untracked `logs/`.
+The eight CSVs behind the published values are hash-recorded in `analysis/precision_results.json`, which is tracked; the CSVs themselves are campaign output under the untracked `logs/`.
 
 The **stock** side of the chain is weaker by construction. `logs/yolo11n.onnx` (`a771561a…`) is the export that every stock engine was built from, and it is consistent across the calibration manifests and build commands, but the identity of the upstream `yolo11n.pt` checkpoint it came from was never recovered. Any stock-versus-adapted AP difference therefore mixes architecture, training budget and checkpoint provenance; the adapted GPU engine, not the stock model, is the controlled comparison for placement.
 
@@ -64,7 +64,6 @@ These are host-side regression tests of the harness, run without an accelerator.
 - The energy collector was exercised against a simulated `tegrastats` process, including the correct rejection of a source exposing only one rail.
 - `compileall` and `pyflakes` pass. Flake8 in the development environment has a plugin conflict on `--application-import-names`, so static checking was done with pyflakes directly.
 - The COCO evaluator's CPU branch was smoke-tested against an explicitly synthetic single-image annotation; that AP is a fixture, not a result.
-- PDF preflight (`make -C tools/paper check`): eight pages, US Letter, 14 embedded fonts, no Type 3 fonts, no links, no bookmarks, no overfull boxes, no unresolved references, empty author metadata.
 
 ## Limitations
 
@@ -86,19 +85,18 @@ These are host-side regression tests of the harness, run without an accelerator.
 
 This branch is prepared for anonymous review. Three kinds of value were redacted from otherwise unmodified records, and nothing else in them was altered; no measured value was touched.
 
-Absolute filesystem paths and the source repository URL appear as `<redacted>` in `tools/paper/analysis/checkpoint_training.json` and inside the two files under `weights/` — the checkpoint recorded them in `train_args`, in its `git` block and in the serialized model's own `yaml` and `args` attributes, and the ONNX recorded one in its `description` metadata. The Weights & Biases entity in the training scripts appears as `<wandb-entity>`.
+Absolute filesystem paths and the source repository URL appear as `<redacted>` in `analysis/checkpoint_training.json` and inside the two files under `weights/` — the checkpoint recorded them in `train_args`, in its `git` block and in the serialized model's own `yaml` and `args` attributes, and the ONNX recorded one in its `description` metadata. The Weights & Biases entity in the training scripts appears as `<wandb-entity>`.
 
-Redacting strings inside a binary changes its file hash, so `weights/` does not match the as-built SHA-256 that the manifests record. What is unchanged is checkable and is the right thing to compare: the checkpoint's parameters are bit-identical (`sha256` over the sorted `state_dict` tensor bytes, `94e3df7af25b7d803c59255c174b1c4d…`) and the ONNX graph is bit-identical (`sha256(graph.SerializeToString())`, `c15763f5fa8e56fc0d4cc71424dc3c50…`), with every ONNX metadata key preserved. Both hash pairs are tabulated in [`BUILD.md`](BUILD.md). One visible consequence: `tools/paper/analysis/checkpoint_training.json` is the record of the **as-built** checkpoint and names it by its original path and hash, so re-running `run.py extract-checkpoint` against the distributed copy rewrites those two fields to `weights/yolo11-dla-n.pt` and its hash. That difference is expected; every other field, including the 500-epoch history, is reproduced unchanged. The container definitions, the workspace scaffolding and the editor configuration of the full repository are omitted here because they carry organizational identifiers; they are not needed to build, run or audit anything documented in these pages.
+Redacting strings inside a binary changes its file hash, so `weights/` does not match the as-built SHA-256 that the manifests record. What is unchanged is checkable and is the right thing to compare: the checkpoint's parameters are bit-identical (`sha256` over the sorted `state_dict` tensor bytes, `94e3df7af25b7d803c59255c174b1c4d…`) and the ONNX graph is bit-identical (`sha256(graph.SerializeToString())`, `c15763f5fa8e56fc0d4cc71424dc3c50…`), with every ONNX metadata key preserved. Both hash pairs are tabulated in [`BUILD.md`](BUILD.md). One visible consequence: `analysis/checkpoint_training.json` is the record of the **as-built** checkpoint and names it by its original path and hash, so re-running `run.py extract-checkpoint` against the distributed copy rewrites those two fields to `weights/yolo11-dla-n.pt` and its hash. That difference is expected; every other field, including the 500-epoch history, is reproduced unchanged. The container definitions, the workspace scaffolding and the editor configuration of the full repository are omitted here because they carry organizational identifiers; they are not needed to build, run or audit anything documented in these pages.
 
 ## Detailed audits
 
-The long-form audits are preserved verbatim under [`../tools/paper/audits/`](../tools/paper/audits/):
+The long-form audits are preserved verbatim under [`../analysis/audits/`](../analysis/audits/):
 
 | File | Contents |
 |---|---|
 | `EVIDENCE_AUDIT.md` | Source and provenance audit of the historical FP16 evidence, measurement definitions, quantitative findings and statistical limits |
 | `MODEL_AUDIT.md` | Implementation provenance, training discrepancies and runtime caveats |
 | `PRECISION_UPDATE.md` | Sources, interpretation and reproduction commands for the combined FP16/INT8 results |
-| `REFERENCE_AUDIT.md` | Primary-source verification of every citation |
-| `GUIDELINES.md` | Submission requirements the manuscript was prepared against |
-| `NOTES.md` | Revision record of the manuscript, including corrections made to earlier claims |
+
+The editorial audits that accompanied them — citation verification, submission requirements and the manuscript revision record — belong to the manuscript and are not distributed here.

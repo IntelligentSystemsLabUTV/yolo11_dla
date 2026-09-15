@@ -5,11 +5,11 @@ Audited 2026-09-08. This is a private preparation document: checkpoint metadata 
 Update 2026-09-10: the author confirms compatible-weight initialization from
 YOLO11n. The repository and checkpoint revision establish the partial loading
 path and reconstruct automatic optimizer selection as MuSGD. See
-[TRAINING_RECONSTRUCTION.md](../../../docs/ARCHITECTURE.md).
+[TRAINING_RECONSTRUCTION.md](../../docs/ARCHITECTURE.md).
 The historical open points below are superseded for initialization source and
 the described optimizer recipe, not for missing historical file hashes.
 The six deployed-engine COCO evaluations are now complete; see
-[RUN_01_AUDIT.md](../../../docs/PROVENANCE.md).
+[RUN_01_AUDIT.md](../../docs/PROVENANCE.md).
 
 ## What the implemented detector actually changes
 

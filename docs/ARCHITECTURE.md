@@ -88,7 +88,7 @@ Measurements taken before these fixes were not reused for the sparse path; the r
 
 The nano model is initialized from pretrained `yolo11n.pt`. The loader intersects source and destination state dictionaries by tensor name **and** shape, copies the matching entries and loads them non-strictly (`BaseModel.load` → `intersect_dicts` in the fork). Everything compatible — backbone, neck, detection towers, and the parts of the replacement block that happen to match — is transferred; the rest keeps its model initialization. No QKV remapping and no frozen-backbone stage are involved, and no specialized two-phase recipe was used.
 
-Recorded training configuration, extracted from the checkpoint itself into [`../tools/paper/analysis/checkpoint_training.json`](../tools/paper/analysis/checkpoint_training.json):
+Recorded training configuration, extracted from the checkpoint itself into [`../analysis/checkpoint_training.json`](../analysis/checkpoint_training.json):
 
 - COCO train2017, 500 epochs, batch 32, 640×640, seed 0, 8 workers, AMP, `freeze=None`, `nbs=64`, `optimizer=auto`.
 - Base LR 0.01, `lrf=0.01`, momentum 0.9, weight decay 5×10⁻⁴, three warm-up epochs then linear decay; mosaic closed for the last ten epochs.

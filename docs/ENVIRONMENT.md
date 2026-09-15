@@ -44,11 +44,9 @@ Reading the evidence requires nothing. Regenerating derived artifacts requires:
 
 | Task | Needs |
 |---|---|
-| `run.py audit`, `make -C tools/paper precision-results` | Python, NumPy, Matplotlib |
-| `run.py extract-checkpoint` | PyTorch, and the checkpoint in `logs/` |
+| `run.py audit`, `run.py collect-results` | Python, NumPy, Matplotlib |
+| `run.py extract-checkpoint` | PyTorch, and the checkpoint in `weights/` |
 | `run.py check-model` | ONNX, ONNX Runtime, PyTorch |
-| `make -C tools/paper check` | PyMuPDF |
-| `make -C tools/paper` | Tectonic |
 | `pytest tools/experiments/tests` | pytest, NumPy |
 | Anything that touches an engine | The target board, its TensorRT, and the Ultralytics fork on `PYTHONPATH` |
 
