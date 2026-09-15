@@ -46,7 +46,7 @@ Three of these were found during the evidence audit and are worth repeating, bec
 2. **The only end-to-end JSON records kept in `fp16_matrix/` belong to the independent YOLO-DLA family**, which is outside the paper's scope. They cannot be used to fill YOLO11-DLA rows.
 3. **`dla_yolo11n*.md` in the development workspace documents segmentation at 512×512**, an earlier phase of the work, not the 640×640 detection results of the paper. `best-mAP50-95_0.37395.pt` is named after a value its own contents do not confirm. Neither belongs to this study.
 
-Historical absolute paths are preserved faithfully in the archived records rather than rewritten: the original TensorRT logs refer to `logs/paper/fp16_matrix/…`, which does not correspond to any current directory, and the Jetson container mounted the workspace at `/home/neo/workspace`. Those strings are provenance, not usable paths.
+Historical absolute paths are preserved faithfully in the archived records rather than rewritten: the original TensorRT logs refer to `logs/paper/fp16_matrix/…`, which does not correspond to any current directory, and the remaining absolute paths are the container's own mount point on the Jetson. Those strings are provenance, not usable paths.
 
 ## Command archive
 
@@ -81,6 +81,10 @@ These are host-side regression tests of the harness, run without an accelerator.
 **Energy scope.** Module power, three rails, not wall-plug and not the full carrier. Sensor-to-host delay is uncalibrated. Idle-subtracted values depend on the stability of a single idle interval. Values are specific to the 10 Hz operating point.
 
 **Environment.** ROS 2 Jazzy is present on the platform but camera acquisition, transport, mapping, control and any robot-level integration are outside the measured boundary. The benchmark is a standalone runner, not a ROS 2 node, and a COCO image sequence is not a rosbag.
+
+## Anonymization
+
+This branch is prepared for anonymous review. Two kinds of value were redacted from otherwise unmodified records: absolute filesystem paths and the source repository URL in `tools/paper/analysis/checkpoint_training.json`, which appear as `<redacted>`, and the Weights & Biases entity in the training scripts, which appears as `<wandb-entity>`. Nothing else in those files was altered, and no measured value was touched. The container definitions, the workspace scaffolding and the editor configuration of the full repository are omitted here because they carry organizational identifiers; they are not needed to build, run or audit anything documented in these pages.
 
 ## Detailed audits
 

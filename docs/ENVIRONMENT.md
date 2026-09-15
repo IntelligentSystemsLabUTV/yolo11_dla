@@ -7,7 +7,6 @@ Every number in the paper comes from one board. The values below are not a recom
 | | |
 |---|---|
 | Board | NVIDIA Jetson AGX Orin Developer Kit (`/proc/device-tree/model`) |
-| Host name in traces | `orinagx1` |
 | L4T | R36.4.4, kernel 5.15.148-tegra, aarch64 |
 | CUDA | runtime 12.6, `nvcc` 12.6.68 |
 | TensorRT | 10.3.0.30-1+cuda12.5 (`libnvinfer*`) |
@@ -24,17 +23,13 @@ Every number in the paper comes from one board. The values below are not a recom
 
 ## Containers
 
-Both containers are DUA environment images and are checked in under [`../docker/`](../docker/).
+Every Jetson measurement — builds, calibration, parity, accuracy, `trtexec` microbenchmarks, the application pipeline and the energy campaigns — ran inside a JetPack 6 container on the board, privileged, using the NVIDIA container runtime and host networking, with the repository root bind-mounted into it. That mount point is why absolute paths recorded inside the manifests are container paths rather than host paths. Training the checkpoint and the host-side analysis ran in a separate x86 CUDA container.
 
-`container-jetson6` is the JetPack 6 image in which every Jetson measurement ran — builds, calibration, parity, accuracy, `trtexec` microbenchmarks, the application pipeline and the energy campaigns. It is privileged, uses the NVIDIA runtime and host networking, and mounts the workspace at `/home/neo/workspace`, which is why recorded absolute paths in the manifests begin with that prefix.
-
-`container-x86-cudev` is the x86 CUDA development image used for training the checkpoint and for host-side analysis.
-
-`tegrastats` is not present inside the Jetson container. For the energy campaigns the host binary was copied in once:
+`tegrastats` is not present in the Jetson image. For the energy campaigns the host binary was copied into the running container once:
 
 ```bash
 # on the Jetson host
-docker cp -L /usr/bin/tegrastats devcontainer-yolo_dla-jetson6-1:/tmp/tegrastats-paper
+docker cp -L /usr/bin/tegrastats CONTAINER:/tmp/tegrastats-paper
 ```
 
 and then passed explicitly with `--tegrastats /tmp/tegrastats-paper`. If the container is recreated, repeat the copy and check that it reports the three rails before collecting anything. The energy collector starts and stops the binary itself for each test, including idle, and never kills a `tegrastats` process it did not start.

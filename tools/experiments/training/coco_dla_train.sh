@@ -5,7 +5,7 @@ SCRIPT_DIR="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")"
 TOOLS_DIR="$(cd -- "${SCRIPT_DIR}/../../" && pwd)"
 TRAINER="${SCRIPT_DIR}/train_coco_dla.py"
 RUNS_DIR="${TOOLS_DIR}/ultralytics/runs"
-WANDB_ENTITY="alexandru-cretu-university-of-rome-tor-vergata"
+WANDB_ENTITY="<wandb-entity>"
 WANDB_PROJECT="yolo_dla"
 
 configure_model() {

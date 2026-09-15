@@ -10,16 +10,16 @@
   "date": "2026-08-14T15:28:47.320520",
   "version": "8.4.48",
   "git": {
-    "root": "/home/acretu/yolo_dla/tools/ultralytics",
+    "root": "<redacted>/tools/ultralytics",
     "branch": null,
     "commit": "3f2711b10e21eedf4e2efaa907c1322d844ea2d7",
-    "origin": "git@github.com:ErLex20/ultralytics.git"
+    "origin": "<redacted>"
   },
   "train_args": {
     "task": "detect",
     "mode": "train",
-    "model": "/home/acretu/yolo_dla/tools/ultralytics/ultralytics/cfg/models/11/yolo11-dla.yaml",
-    "data": "/home/acretu/yolo_dla/tools/datasets/coco-bbox.yaml",
+    "model": "<redacted>/tools/ultralytics/ultralytics/cfg/models/11/yolo11-dla.yaml",
+    "data": "<redacted>/tools/datasets/coco-bbox.yaml",
     "epochs": 500,
     "time": null,
     "patience": 100,
@@ -30,7 +30,7 @@
     "cache": false,
     "device": "0",
     "workers": 8,
-    "project": "/home/acretu/yolo_dla/tools/ultralytics/runs/detect",
+    "project": "<redacted>/tools/ultralytics/runs/detect",
     "name": "coco-yolo11n-dla",
     "exist_ok": true,
     "pretrained": true,

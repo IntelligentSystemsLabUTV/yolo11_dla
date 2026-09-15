@@ -2,10 +2,10 @@
 
 Conditions of the FP16 campaign (`logs/icra2027_final/`) and the INT8 campaign (`logs/icra2027_int8/`). Values marked *declared* were confirmed by the author and could not be read back from the logs; values marked *not recovered* are stated as missing rather than inferred. Every measurement directory also carries its own `provenance` block with the same queries.
 
-- **Jetson module / SKU / RAM:** NVIDIA Jetson AGX Orin Developer Kit, reported by `/proc/device-tree/model`. Host name in the traces: `orinagx1`. Exact SKU and RAM size *not recovered* from the container.
+- **Jetson module / SKU / RAM:** NVIDIA Jetson AGX Orin Developer Kit, reported by `/proc/device-tree/model`. Exact SKU and RAM size *not recovered* from the container.
 - **Carrier board:** the Developer Kit carrier.
 - **JetPack / L4T:** L4T R36.4.4, kernel 5.15.148-tegra, aarch64, GCID 41062509, dated 2025-06-16.
-- **Container image or environment, and its digest:** the `container-jetson6` target in `docker/`, a DUA JetPack 6 environment image, with the repository root bind-mounted at `/home/neo/workspace`. Image digest *not recovered*.
+- **Container image or environment, and its digest:** a JetPack 6 environment image, with the repository root bind-mounted into it. Image digest *not recovered*.
 - **TensorRT / CUDA / cuDNN / PyTorch:** TensorRT 10.3.0.30-1+cuda12.5, CUDA runtime 12.6 with `nvcc` 12.6.68, cuDNN 9.3.0.75, PyTorch 2.5.0a0+872d972e41.nv24.8, torchvision 0.20.0, Python 3.10.12, numpy 1.23.5, onnx 1.21.0, pycocotools 2.0.11, OpenCV 4.11.0. ROS 2 Jazzy is installed in the environment but is outside the measured boundary.
 - **`nvpmodel` mode:** NVIDIA 50 W mode (*declared*). `nvpmodel -q --verbose` was **not available inside the container** and the manifests record the failed query. The mode was not measured back from the logs.
 - **Clock policy:** `jetson_clocks` **disabled** (*declared*); `jetson_clocks --show` likewise failed inside the container. Telemetry shows CPU frequencies varying mostly between 729 and 1497 MHz during the runs, which is consistent with clocks left unlocked. No script changed clocks or power mode.

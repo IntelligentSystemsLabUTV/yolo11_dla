@@ -18,7 +18,7 @@ import wandb
 
 RUNS_DIR = WORKSPACE / "tools" / "ultralytics" / "runs" / "detect"
 
-DEFAULT_ENTITY = "alexandru-cretu-university-of-rome-tor-vergata"
+DEFAULT_ENTITY = "<wandb-entity>"
 DEFAULT_PROJECT = "yolo_dla"
 # Keep the repaired history separate from the old run, whose steps used mixed
 # zero-based and one-based epoch conventions.

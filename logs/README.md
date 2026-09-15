@@ -1,6 +1,6 @@
 # `logs/` — models and measurement artifacts
 
-**This directory is not tracked.** Following the DUA convention, `logs/.gitignore` ignores everything here except the control files and this page. It is the working directory where the models, the engines and every measurement campaign live, on the machine that runs them.
+**This directory is not tracked.** `logs/.gitignore` ignores everything here except this page. It is the working directory where the models, the engines and every measurement campaign live, on the machine that runs them.
 
 The repository ships the code, the protocol and the **derived** record the manuscript is built from — `tools/paper/analysis/` holds the audited CSV/JSON with the SHA-256 of each raw source. The raw artifacts described below are produced by the commands in [`../docs/EXPERIMENTS.md`](../docs/EXPERIMENTS.md) and are not carried in git.
 
@@ -42,4 +42,4 @@ It reproduces byte-identically for the pipeline, energy and microbenchmark stage
 
 `yolo11n-dla-gpu-fallback-fp16.*` is **stock YOLO11n**, not the adapted model: the `dla` in the prefix refers to the DLA fallback build, and the build command loads `yolo11n.onnx`. The only end-to-end JSON records in `fp16_matrix/` belong to the independent YOLO-DLA family, which is outside the paper's scope and cannot fill YOLO11-DLA rows. Both are documented in [`../docs/PROVENANCE.md`](../docs/PROVENANCE.md).
 
-Absolute paths recorded inside manifests and logs begin with `/home/neo/workspace`, the container mount point on the Jetson, or with `logs/paper/…` in the oldest records. They are provenance strings, not paths that resolve on a fresh checkout.
+Absolute paths recorded inside manifests and logs begin with the container's mount point on the Jetson, or with `logs/paper/…` in the oldest records. They are provenance strings, not paths that resolve on a fresh checkout.

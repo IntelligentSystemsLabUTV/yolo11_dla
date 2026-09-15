@@ -1,7 +1,4 @@
-# Ignore everything in this folder except the control files and some subdirectories
-# This is the default, feel free to add other exceptions
+# Models and measurement artifacts are not tracked; see README.md in this folder.
 *
 !.gitignore
-!COLCON_IGNORE
 !README.md
-!ros/

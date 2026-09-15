@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/TensorRT-10.3-76B900?logo=nvidia&logoColor=white" alt="TensorRT 10.3">
   <img src="https://img.shields.io/badge/PyTorch-2.5-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch 2.5">
   <img src="https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white" alt="Python 3.10">
-  <a href="https://github.com/IntelligentSystemsLabUTV/yolo11_dla/blob/main/LICENSE"><img src="https://img.shields.io/github/license/IntelligentSystemsLabUTV/yolo11_dla" alt="License"></a>
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0">
 </p>
 
 <p align="center">
@@ -27,25 +27,21 @@ The result that matters for robotics is the one that cuts the other way: strict 
 It provides the model configuration, the export/build/calibration tooling, the measurement harness for accuracy, latency and module energy, the manuscript sources, and the audited record behind every number in the paper — each summary hash-linked to the raw artifact it was computed from, and each protocol documented well enough to run again. Users of YOLO11-DLA should cite:
 
 ```bibtex
-@unpublished{cretu2026yolo11dla,
+@unpublished{anonymous2026yolo11dla,
   title   = {YOLO11-DLA: Fallback-Free Object Detection on NVIDIA DLA
              for Embedded Robotic Perception},
-  author  = {Cretu, Alexandru and <FILL IN THE REMAINING AUTHORS>},
+  author  = {Anonymous Author(s)},
   year    = {2026},
-  note    = {Submitted}
+  note    = {Under review}
 }
 ```
-
-Correspondence: `alexandru.cretu@uniroma2.it`
 
 This guide treats the repository root as the workspace. Run every command below from that directory unless stated otherwise.
 
 ## Table of contents
 
 - [1. Clone the repository](#1-clone-the-repository)
-- [2. Choose the environment](#2-choose-the-environment)
-  - [Option A: install the dependencies yourself](#option-a-install-the-dependencies-yourself)
-  - [Option B: use the provided Docker environment](#option-b-use-the-provided-docker-environment)
+- [2. Install the dependencies](#2-install-the-dependencies)
 - [3. What the model changes](#3-what-the-model-changes)
 - [4. Export and build the engines](#4-export-and-build-the-engines)
 - [5. Verify the placement](#5-verify-the-placement)
@@ -57,7 +53,7 @@ This guide treats the repository root as the workspace. Run every command below 
 ## 1. Clone the repository
 
 ```bash
-git clone https://github.com/IntelligentSystemsLabUTV/yolo11_dla.git
+git clone https://anonymous.4open.science/r/yolo11_dla
 cd yolo11_dla
 ```
 
@@ -72,11 +68,11 @@ export PYTHONPATH="$PWD/tools/ultralytics${PYTHONPATH:+:$PYTHONPATH}"
 
 Reading the documentation, regenerating the tables and rebuilding the manuscript do not need the fork.
 
-## 2. Choose the environment
+## 2. Install the dependencies
 
 Three levels of dependency, depending on how far you want to go. Reading the protocol and the audited record needs nothing at all; re-deriving the summary tables from a campaign's raw records needs Python and NumPy; running anything that loads an engine needs the target board.
 
-### Option A: install the dependencies yourself
+The measurements ran inside a JetPack 6 container on the board, with the repository bind-mounted into it. `tegrastats` is not present in that image, so the energy campaigns used a copy of the host binary passed explicitly with `--tegrastats`; see [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
 
 | Task | Needs |
 | --- | --- |
@@ -89,29 +85,6 @@ Three levels of dependency, depending on how far you want to go. Reading the pro
 | Export, build, calibrate, measure | a Jetson with TensorRT, [OpenCV](https://opencv.org), [pycocotools](https://github.com/ppwwyyxx/cocoapi) and the Ultralytics fork |
 
 The measured stack is L4T 36.4.4, CUDA 12.6, TensorRT 10.3.0.30, cuDNN 9.3.0, PyTorch 2.5.0a0, Python 3.10.12, ROS 2 Jazzy, in NVIDIA's 50 W power mode with `jetson_clocks` disabled. Full details, including the power-rail topology, are in [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md).
-
-### Option B: use the provided Docker environment
-
-The repository ships the two container targets that were actually used, built on [DUA (Distributed Unified Architecture)](https://github.com/dotX-Automation/dua-template):
-
-| Target | For |
-| --- | --- |
-| `container-jetson6` | Jetson, JetPack 6 — **every measurement in the paper ran here** |
-| `container-x86-cudev` | workstation with CUDA — training and host-side analysis |
-
-They need [Docker Engine](https://docs.docker.com/engine/install/ubuntu/), its [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall) for non-root access, and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). The repository root is bind-mounted at `/home/neo/workspace`, which is why absolute paths recorded inside the manifests start with that prefix:
-
-```bash
-cd docker/container-jetson6/.devcontainer
-docker compose up -d --build
-docker compose exec yolo_dla-jetson6 zsh
-```
-
-`tegrastats` is not inside the container. The energy campaigns used a copy made once from the host, and the collector starts and stops it per test:
-
-```bash
-docker cp -L /usr/bin/tegrastats devcontainer-yolo_dla-jetson6-1:/tmp/tegrastats-paper
-```
 
 ## 3. What the model changes
 
@@ -271,7 +244,7 @@ Every stage wants a **new** output directory, has no resume, verifies engine has
 
 ## Evidence
 
-Models, engines and measurement artifacts live under `logs/`, which follows the DUA convention and is **not tracked** — the two campaigns behind the paper are about 164 MB, and the per-image COCO prediction dumps behind them are several gigabytes more. [`logs/README.md`](logs/README.md) documents what every stage expects there and what it writes.
+Models, engines and measurement artifacts live under `logs/`, which is **not tracked** — the two campaigns behind the paper are about 164 MB, and the per-image COCO prediction dumps behind them are several gigabytes more. [`logs/README.md`](logs/README.md) documents what every stage expects there and what it writes.
 
 What the repository does carry is the **derived** record, in [`tools/paper/analysis/`](tools/paper/analysis/), each file hash-linked to the raw artifact it was computed from:
 
@@ -304,12 +277,11 @@ tools/
 ├── paper/                manuscript, generated tables and figures, preserved audits
 └── ultralytics/          the model fork: C2DLA, DetectDLA, host decoder, model YAML
 logs/                     untracked: models, engines and measurement campaigns live here
-docker/                   the two DUA container targets that were used
 ```
 
 ## Copyright and License
 
-Copyright 2026 Alexandru Cretu
+Copyright 2026 Anonymous Author
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 

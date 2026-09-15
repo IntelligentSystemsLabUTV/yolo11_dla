@@ -102,7 +102,7 @@ MODELS = {
     ),
 }
 
-WANDB_ENTITY = "alexandru-cretu-university-of-rome-tor-vergata"
+WANDB_ENTITY = "<wandb-entity>"
 WANDB_PROJECT = "yolo_dla"
 
 
