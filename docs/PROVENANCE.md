@@ -22,9 +22,9 @@ Nothing was rebuilt to populate a tidier directory structure. Registration creat
 The chain from trained weights to measured engine is stated as hashes across the tracked audit files and reproduced by each campaign's own manifests:
 
 ```
-logs/yolo11n-dla-500ep.pt      417967ac…  ← checkpoint_training.json, model_verification.json
+checkpoint                  417967ac…  ← checkpoint_training.json, model_verification.json
         ↓ prepare (opset 20, static 1×3×640×640)
-logs/yolo11n-dla-500ep.onnx    2712fe11…  ← int8_calibration/adapted/manifest.json, model_verification.json
+adapted ONNX export         2712fe11…  ← int8_calibration/adapted/manifest.json, model_verification.json
         ↓ int8-calibrate (EntropyCalibrator2, 500 images, seed 2027, pre-fusion)
 logs/int8_calibration/adapted/calibration.cache   f9082ab7…  ← int8_ready/adapted-strict.engine.quantization.json
         ↓ trtexec --useDLACore=0 --int8 --fp16 --inputIOFormats=int8:dla_hwc4 --outputIOFormats=int8:chw32
@@ -84,7 +84,11 @@ These are host-side regression tests of the harness, run without an accelerator.
 
 ## Anonymization
 
-This branch is prepared for anonymous review. Two kinds of value were redacted from otherwise unmodified records: absolute filesystem paths and the source repository URL in `tools/paper/analysis/checkpoint_training.json`, which appear as `<redacted>`, and the Weights & Biases entity in the training scripts, which appears as `<wandb-entity>`. Nothing else in those files was altered, and no measured value was touched. The container definitions, the workspace scaffolding and the editor configuration of the full repository are omitted here because they carry organizational identifiers; they are not needed to build, run or audit anything documented in these pages.
+This branch is prepared for anonymous review. Three kinds of value were redacted from otherwise unmodified records, and nothing else in them was altered; no measured value was touched.
+
+Absolute filesystem paths and the source repository URL appear as `<redacted>` in `tools/paper/analysis/checkpoint_training.json` and inside the two files under `weights/` — the checkpoint recorded them in `train_args`, in its `git` block and in the serialized model's own `yaml` and `args` attributes, and the ONNX recorded one in its `description` metadata. The Weights & Biases entity in the training scripts appears as `<wandb-entity>`.
+
+Redacting strings inside a binary changes its file hash, so `weights/` does not match the as-built SHA-256 that the manifests record. What is unchanged is checkable and is the right thing to compare: the checkpoint's parameters are bit-identical (`sha256` over the sorted `state_dict` tensor bytes, `94e3df7af25b7d803c59255c174b1c4d…`) and the ONNX graph is bit-identical (`sha256(graph.SerializeToString())`, `c15763f5fa8e56fc0d4cc71424dc3c50…`), with every ONNX metadata key preserved. Both hash pairs are tabulated in [`BUILD.md`](BUILD.md). The container definitions, the workspace scaffolding and the editor configuration of the full repository are omitted here because they carry organizational identifiers; they are not needed to build, run or audit anything documented in these pages.
 
 ## Detailed audits
 

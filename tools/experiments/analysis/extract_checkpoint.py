@@ -9,7 +9,7 @@ from _paths import WORKSPACE, ARTIFACTS
 import csv, hashlib, json, sys
 import torch
 sys.path.insert(0,str(WORKSPACE/'tools/ultralytics'))
-source=WORKSPACE/'logs/yolo11n-dla-500ep.pt'
+source=WORKSPACE/'weights/yolo11-dla-n.pt'
 checkpoint=torch.load(source,map_location='cpu',weights_only=False)
 history=checkpoint['train_results']
 model=checkpoint.get('ema') or checkpoint['model']
