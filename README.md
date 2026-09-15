@@ -57,16 +57,14 @@ git clone https://anonymous.4open.science/r/yolo11_dla
 cd yolo11_dla
 ```
 
-YOLO11-DLA is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics), not a separate codebase. [`docs/MODEL_PATCH.md`](docs/MODEL_PATCH.md) is the complete patch against upstream revision `a462bb65`: `C2DLA`, `DetectDLA`, the model YAML, the host decoder and the export hooks, with the parts belonging to other experiments explicitly excluded. Apply it to a checkout at `tools/ultralytics/`, then put that path on `PYTHONPATH`:
+The model itself is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics) and lives in a companion repository — `C2DLA`, `DetectDLA`, the `yolo11-dla` configuration and the host-side decoder, 229 added lines over upstream `a462bb65`. Clone it where the tooling expects it and put that path on `PYTHONPATH`:
 
 ```bash
-git clone https://github.com/ultralytics/ultralytics.git tools/ultralytics
-git -C tools/ultralytics checkout a462bb65
-# apply the changes in docs/MODEL_PATCH.md
+git clone https://anonymous.4open.science/r/ultralytics-dla tools/ultralytics
 export PYTHONPATH="$PWD/tools/ultralytics${PYTHONPATH:+:$PYTHONPATH}"
 ```
 
-Reading the documentation, regenerating the tables and rebuilding the manuscript do not need the fork.
+[`docs/MODEL_PATCH.md`](docs/MODEL_PATCH.md) documents that patch change by change, including what was deliberately left out, so it can also be reapplied to a plain upstream checkout. Reading the documentation, regenerating the tables and rebuilding the manuscript do not need the fork at all.
 
 ## 2. Install the dependencies
 

@@ -2,7 +2,7 @@
 
 Everything YOLO11-DLA-n adds to stock Ultralytics, and nothing else. The fork branch also carries an independent from-scratch detector family (YOLO-DLA) and a segmentation variant; neither is part of this paper, and both are listed under [What is deliberately excluded](#what-is-deliberately-excluded) so that the boundary is explicit rather than implied.
 
-Base revision: upstream Ultralytics `a462bb65` ("Professionalize YOLOv5 tutorials", #24468), the merge base of the fork. Applying the ten changes below to that revision reproduces the model, the export and the host decoder used for every result in the paper.
+Base revision: upstream Ultralytics `a462bb65` ("Professionalize YOLOv5 tutorials", #24468), the merge base of the fork. Applying the ten changes below to that revision reproduces the model, the export and the host decoder used for every result in the paper. The already-applied result is published at <https://anonymous.4open.science/r/ultralytics-dla>; this page is the change-by-change account of what is in it and why, and lets the patch be reapplied to any other checkout.
 
 | File | Change | Required for |
 | --- | --- | --- |
