@@ -1,0 +1,32 @@
+[
+  {
+    "attachment_id": "12a05be4-2111-487f-8520-bec4b5846ea7",
+    "archived_file": "history/sources/2026-08-25-initial-adapted-strict.txt",
+    "sha256": "518f1731d9d68cb7a563e13c468b003959db04ef161100d2cb7f50e94b5740c2",
+    "bytes": 12165
+  },
+  {
+    "attachment_id": "a639eb61-d96f-426c-95a8-524f2f3e42a5",
+    "archived_file": "history/sources/2026-08-25-initial-stock-gpu.txt",
+    "sha256": "c0c8f39fbe5158f5fbf409127a73c66969c1263b72ef788b2656ccf3bf3d9726",
+    "bytes": 20591
+  },
+  {
+    "attachment_id": "a3d9ce61-c5c0-43cf-9090-b4144000b65a",
+    "archived_file": "history/sources/2026-08-25-matrix-console-summary.txt",
+    "sha256": "193d91d950ecace5c2863a4de02722f46e277a93017cbb81e8fac40d0439dd19",
+    "bytes": 14534
+  },
+  {
+    "attachment_id": "e47fa737-4fda-4d50-b484-f132e71dfc06",
+    "archived_file": "history/sources/2026-08-25-e2e-initial-default-stream.txt",
+    "sha256": "579e6a86abef1370107a7ca46878c795780e572ba56e790c1fa75377669ad1f3",
+    "bytes": 8972
+  },
+  {
+    "attachment_id": "e362569b-a441-4809-9ce8-50f04c64dca2",
+    "archived_file": "history/sources/2026-08-25-e2e-final-sparse.txt",
+    "sha256": "8ec9869a369a00947932939007597493bb28832274e68c3423535e1a29c0c242",
+    "bytes": 8411
+  }
+]

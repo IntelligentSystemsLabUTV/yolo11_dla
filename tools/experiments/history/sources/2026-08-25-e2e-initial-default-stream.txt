@@ -1,0 +1,148 @@
+❯ python tools/yolo_e2e_tester.py \
+  --engine logs/paper/fp16_matrix/yolo11n-gpu-fp16.engine \
+  --image logs/biascica_simone.jpg \
+  --post-device cpu \
+  --cpu-threads 1 \
+  --warmup 20 \
+  --runs 200
+
+Engine bindings:
+  IN  images           logical=(1, 3, 640, 640) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=1228800
+      Row major linear FP16 format (kLINEAR); strides=(1228800, 409600, 640, 1)
+  OUT output0          logical=(1, 84, 8400) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=705600
+      Row major linear FP16 format (kLINEAR); strides=(705600, 8400, 1)
+[08/25/2026-15:05:44] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+
+Post-processing contract: head=standard, reg_max=None, device=cpu
+Input image: logs/biascica_simone.jpg (960x1280); engine input: 640x640
+
+Timed in-memory pipeline over 200 runs (image file read and drawing excluded):
+  stage                         mean    median       p95       p99       min       max
+  preprocess_ms                5.119     5.152     5.555     5.619     4.616     5.681
+  input_pack_h2d_ms            1.771     1.762     2.019     2.059     1.511     2.130
+  engine_ms                    8.574     8.449     9.066     9.084     8.218     9.141
+  output_unpack_ms             1.190     1.148     1.390     1.465     1.008     1.568
+  postprocess_ms               2.915     2.885     3.204     3.296     2.584     3.460
+  total_ms                    19.599    19.546    20.816    21.310    18.202    21.520
+
+  Sequential E2E rate from median total: 51.16 images/s
+
+Detections at conf=0.25: 1
+  person           conf=0.893 box=(405.5, 193.0, 721.5, 1066.0)
+
+Saved annotated image: logs/biascica_simone_yolo11n-gpu-fp16_e2e.jpg
+Saved timing report:  logs/biascica_simone_yolo11n-gpu-fp16_e2e.json
+❯ python tools/yolo_e2e_tester.py \
+  --engine logs/paper/fp16_matrix/yolo11n-dla-gpu-fallback-fp16.engine \
+  --image logs/biascica_simone.jpg \
+  --dla-core 0 \
+  --post-device cpu \
+  --cpu-threads 1 \
+  --warmup 20 \
+  --runs 200
+
+Engine bindings:
+  IN  images           logical=(1, 3, 640, 640) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=1228800
+      Row major linear FP16 format (kLINEAR); strides=(1228800, 409600, 640, 1)
+  OUT output0          logical=(1, 84, 8400) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=705600
+      Row major linear FP16 format (kLINEAR); strides=(705600, 8400, 1)
+[08/25/2026-15:06:22] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+
+Post-processing contract: head=standard, reg_max=None, device=cpu
+Input image: logs/biascica_simone.jpg (960x1280); engine input: 640x640
+
+Timed in-memory pipeline over 200 runs (image file read and drawing excluded):
+  stage                         mean    median       p95       p99       min       max
+  preprocess_ms                8.617     8.611     8.689     8.786     8.550     8.850
+  input_pack_h2d_ms            2.388     2.392     2.466     2.488     2.228     2.494
+  engine_ms                   35.288    35.235    35.465    35.488    35.178    35.499
+  output_unpack_ms             1.513     1.507     1.559     1.574     1.459     1.585
+  postprocess_ms               3.965     3.973     4.074     4.100     3.768     4.111
+  total_ms                    51.808    51.786    52.075    52.121    51.555    52.160
+
+  Sequential E2E rate from median total: 19.31 images/s
+
+Detections at conf=0.25: 1
+  person           conf=0.894 box=(404.8, 193.0, 721.2, 1065.0)
+
+Saved annotated image: logs/biascica_simone_yolo11n-dla-gpu-fallback-fp16_e2e.jpg
+Saved timing report:  logs/biascica_simone_yolo11n-dla-gpu-fallback-fp16_e2e.json
+❯ python tools/yolo_e2e_tester.py \
+  --engine logs/paper/fp16_matrix/yolo11n-dla-gpu-fp16.engine \
+  --image logs/biascica_simone.jpg \
+  --post-device cpu \
+  --cpu-threads 1 \
+  --warmup 20 \
+  --runs 200
+
+Engine bindings:
+  IN  images           logical=(1, 3, 640, 640) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=1228800
+      Row major linear FP16 format (kLINEAR); strides=(1228800, 409600, 640, 1)
+  OUT pred_p3          logical=(1, 144, 80, 80) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=921600
+      Row major linear FP16 format (kLINEAR); strides=(921600, 6400, 80, 1)
+  OUT pred_p4          logical=(1, 144, 40, 40) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=230400
+      Row major linear FP16 format (kLINEAR); strides=(230400, 1600, 40, 1)
+  OUT pred_p5          logical=(1, 144, 20, 20) dtype=torch.float16 format=TensorFormat.LINEAR physical_elements=57600
+      Row major linear FP16 format (kLINEAR); strides=(57600, 400, 20, 1)
+[08/25/2026-15:07:11] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+
+Post-processing contract: head=raw-nms, reg_max=16, device=cpu
+Input image: logs/biascica_simone.jpg (960x1280); engine input: 640x640
+
+Timed in-memory pipeline over 200 runs (image file read and drawing excluded):
+  stage                         mean    median       p95       p99       min       max
+  preprocess_ms                4.430     4.426     4.474     4.517     4.383     4.609
+  input_pack_h2d_ms            1.792     1.823     1.966     1.996     1.535     2.004
+  engine_ms                    8.325     8.388     8.423     8.440     8.172     8.448
+  output_unpack_ms             2.075     2.116     2.201     2.238     1.881     2.275
+  postprocess_ms              17.009    17.011    17.189    17.243    16.781    17.301
+  total_ms                    33.663    33.747    34.098    34.233    33.022    34.275
+
+  Sequential E2E rate from median total: 29.63 images/s
+
+Detections at conf=0.25: 2
+  person           conf=0.871 box=(408.2, 194.3, 721.4, 1071.3)
+  bench            conf=0.317 box=(14.7, 640.8, 852.6, 1280.0)
+
+Saved annotated image: logs/biascica_simone_yolo11n-dla-gpu-fp16_e2e.jpg
+Saved timing report:  logs/biascica_simone_yolo11n-dla-gpu-fp16_e2e.json
+❯ python tools/yolo_e2e_tester.py \
+  --engine logs/paper/fp16_matrix/yolo11n-dla-strict-dla-fp16.engine \
+  --image logs/biascica_simone.jpg \
+  --dla-core 0 \
+  --post-device cpu \
+  --cpu-threads 1 \
+  --warmup 20 \
+  --runs 200
+
+Engine bindings:
+  IN  images           logical=(1, 3, 640, 640) dtype=torch.float16 format=TensorFormat.CHW4 physical_elements=1638400
+      Four wide channel vectorized row major FP16 format (kCHW4); strides=(409600, 1, 640, 1)
+  OUT pred_p3          logical=(1, 144, 80, 80) dtype=torch.float16 format=TensorFormat.CHW16 physical_elements=921600
+      Sixteen wide channel vectorized row major FP16 format (kCHW16); strides=(57600, 6400, 80, 1)
+  OUT pred_p4          logical=(1, 144, 40, 40) dtype=torch.float16 format=TensorFormat.CHW16 physical_elements=230400
+      Sixteen wide channel vectorized row major FP16 format (kCHW16); strides=(14400, 1600, 40, 1)
+  OUT pred_p5          logical=(1, 144, 20, 20) dtype=torch.float16 format=TensorFormat.CHW16 physical_elements=57600
+      Sixteen wide channel vectorized row major FP16 format (kCHW16); strides=(3600, 400, 20, 1)
+[08/25/2026-15:07:32] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+
+Post-processing contract: head=raw-nms, reg_max=16, device=cpu
+Input image: logs/biascica_simone.jpg (960x1280); engine input: 640x640
+
+Timed in-memory pipeline over 200 runs (image file read and drawing excluded):
+  stage                         mean    median       p95       p99       min       max
+  preprocess_ms                6.525     6.494     6.816     6.918     6.298     6.950
+  input_pack_h2d_ms            5.665     5.628     5.999     6.333     5.295     6.781
+  engine_ms                   27.789    27.814    28.043    28.119    27.607    28.485
+  output_unpack_ms             5.046     5.039     5.429     5.673     4.456     5.882
+  postprocess_ms              27.171    26.744    28.850    28.994    24.499    29.132
+  total_ms                    72.235    71.755    74.166    74.495    69.295    74.754
+
+  Sequential E2E rate from median total: 13.94 images/s
+
+Detections at conf=0.25: 2
+  person           conf=0.871 box=(408.2, 194.3, 721.4, 1071.3)
+  bench            conf=0.317 box=(14.7, 640.8, 852.9, 1280.0)
+
+Saved annotated image: logs/biascica_simone_yolo11n-dla-strict-dla-fp16_e2e.jpg
+Saved timing report:  logs/biascica_simone_yolo11n-dla-strict-dla-fp16_e2e.json

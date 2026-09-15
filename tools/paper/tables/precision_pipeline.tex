@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\caption{Application pipeline on the same 100 images, 60\,s per test. Latency: ms; rate: frames/s. Includes preprocessing, native I/O, inference, decode and NMS.}
+\label{tab:e2e}\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrrrr@{}}
+\toprule
+& \multicolumn{4}{c}{FP16} & \multicolumn{4}{c}{INT8} \\
+\cmidrule(lr){2-5}\cmidrule(l){6-9}
+Model / device & Median & P95 & P99 & Rate & Median & P95 & P99 & Rate \\
+\midrule
+11n / GPU & 20.030 & 24.658 & 27.702 & 47.99 & 17.556 & 22.104 & 23.681 & 54.70 \\
+11n / DLA+GPU & 51.241 & 59.542 & 64.478 & 18.95 & 29.020 & 37.510 & 40.293 & 32.71 \\
+11-DLA / GPU & 20.307 & 24.584 & 28.591 & 47.63 & 18.212 & 22.467 & 23.780 & 53.00 \\
+11-DLA / DLA & 56.820 & 65.042 & 76.886 & 17.19 & 30.675 & 34.812 & 36.322 & 31.93 \\
+\bottomrule
+\end{tabular*}
+\end{table*}

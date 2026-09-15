@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Engine-plus-transfer latency, batch one, $640\times640$. Median and P95 are milliseconds; rate is queries/s.}
+\label{tab:engine}\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llrrr@{}}
+\toprule
+Model / device & Mode & Median & P95 & Rate \\
+\midrule
+11n / GPU & FP16 & 3.740 & 3.753 & 288.3 \\
+11n / DLA+GPU & FP16 & 34.678 & 34.942 & 29.2 \\
+11-DLA / GPU & FP16 & 3.500 & 3.512 & 317.2 \\
+11-DLA / DLA & FP16 & 27.515 & 27.718 & 37.2 \\
+\midrule
+11n / GPU & INT8 & 3.021 & 3.030 & 357.0 \\
+11n / DLA+GPU & INT8 & 13.068 & 13.094 & 79.5 \\
+11-DLA / GPU & INT8 & 2.828 & 2.836 & 393.4 \\
+11-DLA / DLA & INT8 & 4.167 & 4.173 & 263.7 \\
+\bottomrule
+\end{tabular*}
+\end{table}

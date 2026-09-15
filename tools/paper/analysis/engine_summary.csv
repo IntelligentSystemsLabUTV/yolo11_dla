@@ -1,0 +1,5 @@
+id,model,execution,source_onnx_basename,timed_queries,warmup_queries,engine_bytes,throughput_qps_reported,device_median_ms,inclusive_median_ms,inclusive_p95_ms,inclusive_p99_ms,dla_loadables,gpu_compute_nodes,reformat_nodes
+yolo11n-gpu-fp16,YOLO11n,GPU,yolo11n.onnx,8651,552,8550228,288.273,3.4668,3.74023,3.75293,3.75781,0,119,59
+yolo11n-dla-gpu-fp16,YOLO11-DLA-n,GPU,yolo11n-dla.onnx,9519,605,8282452,317.207,3.15039,3.5,3.51172,3.51562,0,105,50
+yolo11n-dla-gpu-fallback-fp16,YOLO11n,DLA+GPU fallback,yolo11n.onnx,878,57,7190740,29.1688,34.1985,34.6777,34.9419,34.9863,4,11,22
+yolo11n-dla-strict-dla-fp16,YOLO11-DLA-n,strict DLA,yolo11n-dla.onnx,1119,75,6840572,37.2062,26.8164,27.5146,27.7178,27.7441,1,0,0

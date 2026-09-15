@@ -1,0 +1,11 @@
+\section{Conclusion}
+YOLO11-DLA enables one fallback-free DLA loadable in FP16 and INT8 on the
+tested Orin/TensorRT stack. FP16 nearly preserves adapted GPU aggregate AP;
+INT8 introduces a measurable accuracy cost while reducing strict DLA
+engine-plus-transfer latency, application-pipeline latency, and module energy
+at 10\,Hz. Adapted GPU remains faster and lower-energy at this operating point,
+and native I/O processing limits application gains.
+These results establish a verified placement option for embedded robotic
+perception and show why accuracy, precision, engine execution, host overhead,
+and energy must be evaluated jointly. Benefits to concurrent robotic tasks
+require system-level evaluation.

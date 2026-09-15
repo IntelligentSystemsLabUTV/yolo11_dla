@@ -1,0 +1,6 @@
+{
+  "workspace_commit": "b1e2af1c4125034d05f910651c1eabcc137230f6",
+  "source": "tools/yolo_e2e_tester.py",
+  "sha256": "2b5a74f14e06614e1b0da7fbde132b072fea5483ac3f2cf6ee612d038e4b9461",
+  "scope": "Retained Git version before the September 9 sparse/NMS fixes; exact target revision is not certified by terminal logs."
+}
