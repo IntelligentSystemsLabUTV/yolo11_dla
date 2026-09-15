@@ -2,7 +2,7 @@
 
 ## Where the code lives
 
-YOLO11-DLA is a patch to Ultralytics, not a separate codebase. It lives in the companion repository at <https://anonymous.4open.science/r/ultralytics-dla>, which the tooling expects at `tools/ultralytics/`: 418 added lines over upstream revision `a462bb65`, listed below.
+YOLO11-DLA is a patch to Ultralytics, not a separate codebase. It lives in the companion repository at <https://anonymous.4open.science/r/ultralytics-dla>, which the tooling expects at `tools/ultralytics/`: 401 added lines over upstream revision `a462bb65`, listed below.
 
 | Upstream file | Change |
 |---|---|

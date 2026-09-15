@@ -59,7 +59,7 @@ git clone https://anonymous.4open.science/r/yolo11_dla
 cd yolo11_dla
 ```
 
-The model is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics) and lives in a companion repository: `C2DLA`, `DetectDLA`, the `yolo11-dla` configuration and the host-side decoder, 418 added lines over upstream `a462bb65`. Clone it where the tooling expects it and put that path on `PYTHONPATH`:
+The model is a patch to [Ultralytics](https://github.com/ultralytics/ultralytics) and lives in a companion repository: `C2DLA`, `DetectDLA`, the `yolo11-dla` configuration and the host-side decoder, 401 added lines over upstream `a462bb65`. Clone it where the tooling expects it and put that path on `PYTHONPATH`:
 
 ```bash
 git clone https://anonymous.4open.science/r/ultralytics-dla tools/ultralytics
