@@ -140,11 +140,11 @@ Models and measurement artifacts live under `logs/`, which is not tracked: see [
 ```bash
 # ONNX: opset 20, static 1x3x640x640, shapes asserted, every artifact hashed
 python tools/experiments/run.py prepare \
-  --stock /path/to/yolo11n.pt --adapted logs/yolo11n-dla-500ep.pt \
+  --stock /path/to/yolo11n.pt --adapted weights/yolo11-dla-n.pt \
   --hardware-notes tools/experiments/configs/hardware-notes.md --output NEW_DIR
 
 # the strict FP16 engine: no --allowGPUFallback, native DLA I/O formats
-trtexec --onnx=logs/yolo11n-dla-500ep.onnx --saveEngine=OUT/adapted-strict-fp16.engine \
+trtexec --onnx=weights/yolo11-dla-n.onnx --saveEngine=OUT/adapted-strict-fp16.engine \
         --useDLACore=0 --fp16 \
         --inputIOFormats=fp16:dla_hwc4 --outputIOFormats=fp16:chw16 \
         --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=OUT/adapted-strict-fp16.layers.json \
@@ -286,7 +286,7 @@ What the repository does carry is the **derived** record, in [`tools/paper/analy
 
 The chain from weights to measured engine is stated as hashes across these files and reproduced by each campaign's own manifests: the checkpoint hash appears in the training extract, the ONNX hash in the calibration manifests, the cache hash in the quantization sidecar, and the engine hash in every measurement manifest and accuracy summary. A re-run that lands on the same hashes is measuring the same artifacts.
 
-The trained checkpoint is the one input that cannot be regenerated from this repository, since it is 500 epochs of COCO training; obtain it separately, or retrain with `run.py train`.
+The trained checkpoint is the one input this repository cannot regenerate, since it is 500 epochs of COCO training, so it ships directly in [`weights/`](weights/) together with its ONNX export.
 
 ## Repository layout
 
@@ -303,7 +303,8 @@ tools/
 │   └── history/          command archive and recovered provenance
 ├── paper/                manuscript, generated tables and figures, preserved audits
 └── ultralytics/          the model fork: C2DLA, DetectDLA, host decoder, model YAML
-logs/                     untracked: models, engines and measurement campaigns live here
+weights/                  the trained checkpoint and its ONNX export
+logs/                     untracked: engines and measurement campaigns live here
 docker/                   the two DUA container targets that were used
 ```
 

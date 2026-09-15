@@ -27,8 +27,8 @@ from ultralytics.utils.dla import decode_dla_outputs
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, default=WORKSPACE / "logs/yolo11n-dla-500ep.pt")
-    parser.add_argument("--onnx", type=Path, default=WORKSPACE / "logs/yolo11n-dla-500ep.onnx")
+    parser.add_argument("--checkpoint", type=Path, default=WORKSPACE / "weights/yolo11-dla-n.pt")
+    parser.add_argument("--onnx", type=Path, default=WORKSPACE / "weights/yolo11-dla-n.onnx")
     parser.add_argument("--output", type=Path, default=ARTIFACTS / "model_verification.json")
     args = parser.parse_args()
     torch.set_num_threads(2)

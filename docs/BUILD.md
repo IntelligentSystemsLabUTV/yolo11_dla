@@ -8,20 +8,22 @@ Both models are exported with the same settings: opset 20, static `1×3×640×64
 # fill in a hardware-notes file first, starting from configs/hardware-notes.example.md
 python tools/experiments/run.py prepare \
   --stock /path/to/yolo11n.pt \
-  --adapted logs/yolo11n-dla-500ep.pt \
+  --adapted weights/yolo11-dla-n.pt \
   --hardware-notes tools/experiments/configs/hardware-notes.md \
   --output NEW_DIRECTORY
 ```
 
 `prepare` copies each checkpoint, asserts that layer 10 and the head are the expected types (`C2PSA`/`Detect` for stock, `C2DLA`/`DetectDLA` for adapted), asserts COCO detection with `reg_max = 16` and the nano width at layer 10, exports, runs the ONNX checker, and asserts the output shapes — `[[1,144,80,80],[1,144,40,40],[1,144,20,20]]` for the adapted model and `[[1,84,8400]]` for stock. It records SHA-256 for every checkpoint and every export.
 
-The two exports every engine in the paper was built from are identified by these hashes, which recur in the calibration manifests, the build commands and the verification record:
+The artifacts every engine in the paper was built from are identified by the **as-built** hashes below, which are the values recorded in the calibration manifests, the build commands and the verification record.
 
-| File | SHA-256 |
-|---|---|
-| `logs/yolo11n.onnx` | `a771561a8a897283e0454caa7951a23de3494169b65ec7842094e021aec68f17` |
-| `logs/yolo11n-dla-500ep.onnx` | `2712fe1182428d45a3dbf4c00de596507a79333dcd1f4c9d0791c61d7c29fcca` |
-| `logs/yolo11n-dla-500ep.pt` | `417967ac4a0af77f4a4e1f1f31ba4e31b38775853fa7393f0f8824f2a3511535` |
+| Artifact | As built, SHA-256 | Distributed copy |
+|---|---|---|
+| stock export `logs/yolo11n.onnx` | `a771561a8a897283e0454caa7951a23de3494169b65ec7842094e021aec68f17` | not distributed |
+| adapted export | `2712fe1182428d45a3dbf4c00de596507a79333dcd1f4c9d0791c61d7c29fcca` | `weights/yolo11-dla-n.onnx`, `77b9106ec556277354e953a01a7b43b50b2435c4a5b314dec9d9b1783b8ba1d4` |
+| adapted checkpoint | `417967ac4a0af77f4a4e1f1f31ba4e31b38775853fa7393f0f8824f2a3511535` | `weights/yolo11-dla-n.pt`, `440c27347dbf6c84ca8ae9609588769ab8809270bd4a0e36af70760aeb50d683` |
+
+The two files under `weights/` are the as-built artifacts with the local filesystem paths and repository URL recorded inside them replaced by `<redacted>`, which is why their file hashes differ. Nothing else was changed, and that is checkable: the ONNX graph is bit-identical (`sha256(graph.SerializeToString())` = `c15763f5fa8e56fc0d4cc71424dc3c50…` before and after), every ONNX metadata key is preserved, and the checkpoint's parameters are bit-identical (`sha256` over the sorted `state_dict` tensor bytes = `94e3df7af25b7d803c59255c174b1c4d…` before and after). Compare those two invariants, not the file hashes, when checking a copy against the record.
 
 The adapted ONNX graph contains 89 `Conv`, 76 `Sigmoid`, 76 `Mul`, 9 `Split`, 14 `Add`, 20 `Concat`, 3 `MaxPool`, 2 `Resize` and one `Softmax`. It contains **no** `MatMul`, `Gemm`, `Reshape`, `Transpose`, `Div` or `Slice`. The Sigmoid/Mul pairs are the retained SiLU activations; these are pre-fusion node counts, not execution kernels. Source: [`../tools/paper/analysis/model_verification.json`](../tools/paper/analysis/model_verification.json), regenerable with `python tools/experiments/run.py check-model`.
 
@@ -46,12 +48,12 @@ trtexec --onnx=logs/yolo11n.onnx --saveEngine=ENG/yolo11n-dla-gpu-fallback-fp16.
         --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=... --skipInference --verbose
 
 # YOLO11-DLA-n, GPU  (same-model placement control)
-trtexec --onnx=logs/yolo11n-dla-500ep.onnx --saveEngine=ENG/yolo11n-dla-gpu-fp16.engine \
+trtexec --onnx=weights/yolo11-dla-n.onnx --saveEngine=ENG/yolo11n-dla-gpu-fp16.engine \
         --fp16 --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw \
         --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=... --skipInference
 
 # YOLO11-DLA-n, strict DLA  (no --allowGPUFallback, native I/O formats)
-trtexec --onnx=logs/yolo11n-dla-500ep.onnx --saveEngine=ENG/yolo11n-dla-strict-dla-fp16.engine \
+trtexec --onnx=weights/yolo11-dla-n.onnx --saveEngine=ENG/yolo11n-dla-strict-dla-fp16.engine \
         --useDLACore=0 --fp16 \
         --inputIOFormats=fp16:dla_hwc4 --outputIOFormats=fp16:chw16 \
         --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=... --skipInference --verbose
@@ -78,12 +80,12 @@ trtexec --onnx=logs/yolo11n.onnx --saveEngine=... --useDLACore=0 --allowGPUFallb
         --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw ... --skipInference --verbose
 
 # YOLO11-DLA-n, GPU
-trtexec --onnx=logs/yolo11n-dla-500ep.onnx --saveEngine=... --int8 --fp16 \
+trtexec --onnx=weights/yolo11-dla-n.onnx --saveEngine=... --int8 --fp16 \
         --calib=logs/int8_calibration/adapted/calibration.cache \
         --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw ... --skipInference --verbose
 
 # YOLO11-DLA-n, strict DLA, native INT8 bindings
-trtexec --onnx=logs/yolo11n-dla-500ep.onnx --saveEngine=... --useDLACore=0 --int8 --fp16 \
+trtexec --onnx=weights/yolo11-dla-n.onnx --saveEngine=... --useDLACore=0 --int8 --fp16 \
         --calib=logs/int8_calibration/adapted/calibration.cache \
         --inputIOFormats=int8:dla_hwc4 --outputIOFormats=int8:chw32 ... --skipInference --verbose
 ```
@@ -125,7 +127,7 @@ Post-training entropy calibration, no labels, no additional training.
 
 ```bash
 python tools/experiments/run.py int8-split    --annotations "$COCO_ANN" --output "$INT8_SPLIT"   # 500 / 4500, seed 2027
-python tools/experiments/run.py int8-calibrate --onnx logs/yolo11n-dla-500ep.onnx --model adapted \
+python tools/experiments/run.py int8-calibrate --onnx weights/yolo11-dla-n.onnx --model adapted \
        --split "$INT8_SPLIT" --images "$COCO_VAL" --output logs/int8_calibration/adapted
 ```
 
@@ -168,7 +170,7 @@ python tools/experiments/run.py reuse-existing --source logs/fp16_matrix --outpu
 
 python tools/experiments/run.py int8-reuse \
   --matrix logs/int8_matrix --calibration logs/int8_calibration --split "$INT8_SPLIT" \
-  --stock-onnx logs/yolo11n.onnx --adapted-onnx logs/yolo11n-dla-500ep.onnx \
+  --stock-onnx logs/yolo11n.onnx --adapted-onnx weights/yolo11-dla-n.onnx \
   --output logs/int8_ready
 ```
 

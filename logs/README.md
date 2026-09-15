@@ -6,11 +6,12 @@ The repository ships the code, the protocol and the **derived** record the manus
 
 ## What the scripts expect to find here
 
+The adapted model does not live here: the trained checkpoint and its ONNX export ship in [`../weights/`](../weights/) as `yolo11-dla-n.pt` and `yolo11-dla-n.onnx`. What this directory still needs is the stock baseline and the dataset.
+
 | Path | What it is | How to obtain it |
 | --- | --- | --- |
-| `yolo11n-dla-500ep.pt` | the trained YOLO11-DLA-n checkpoint, SHA-256 `417967ac…` | **cannot be regenerated from this repository**: 500 epochs on COCO train2017. Obtain it separately, or retrain with `run.py train` |
 | `yolo11n.pt` | the stock YOLO11n checkpoint | upstream Ultralytics |
-| `yolo11n-dla-500ep.onnx`, `yolo11n.onnx` | the two exports every engine is built from | `run.py prepare`, see [`../docs/BUILD.md`](../docs/BUILD.md) |
+| `yolo11n.onnx` | its export, from which every stock engine is built, SHA-256 `a771561a…` | `run.py prepare`, see [`../docs/BUILD.md`](../docs/BUILD.md) |
 | `datasets/coco/` | val2017 images and `instances_val2017.json` | `bash tools/experiments/datasets/download_coco_val2017.sh` |
 
 ## What each stage writes here

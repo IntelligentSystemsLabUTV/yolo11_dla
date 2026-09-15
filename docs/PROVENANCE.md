@@ -22,9 +22,9 @@ Nothing was rebuilt to populate a tidier directory structure. Registration creat
 The chain from trained weights to measured engine is stated as hashes across the tracked audit files and reproduced by each campaign's own manifests:
 
 ```
-logs/yolo11n-dla-500ep.pt      417967ac…  ← checkpoint_training.json, model_verification.json
+checkpoint                  417967ac…  ← checkpoint_training.json, model_verification.json
         ↓ prepare (opset 20, static 1×3×640×640)
-logs/yolo11n-dla-500ep.onnx    2712fe11…  ← int8_calibration/adapted/manifest.json, model_verification.json
+adapted ONNX export         2712fe11…  ← int8_calibration/adapted/manifest.json, model_verification.json
         ↓ int8-calibrate (EntropyCalibrator2, 500 images, seed 2027, pre-fusion)
 logs/int8_calibration/adapted/calibration.cache   f9082ab7…  ← int8_ready/adapted-strict.engine.quantization.json
         ↓ trtexec --useDLACore=0 --int8 --fp16 --inputIOFormats=int8:dla_hwc4 --outputIOFormats=int8:chw32
