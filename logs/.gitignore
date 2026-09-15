@@ -3,4 +3,5 @@
 *
 !.gitignore
 !COLCON_IGNORE
+!README.md
 !ros/

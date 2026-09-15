@@ -1,0 +1,103 @@
+{
+  "scope": "CPU verification of trained YOLO11-DLA export and decoder; neither stock-YOLO11 equivalence nor TensorRT/DLA numerical validation",
+  "checkpoint_sha256": "417967ac4a0af77f4a4e1f1f31ba4e31b38775853fa7393f0f8824f2a3511535",
+  "onnx_sha256": "2712fe1182428d45a3dbf4c00de596507a79333dcd1f4c9d0791c61d7c29fcca",
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "onnx": "1.21.0",
+    "onnxruntime": "1.28.0"
+  },
+  "input": {
+    "shape": [
+      1,
+      3,
+      640,
+      640
+    ],
+    "generator": "torch.rand",
+    "seed": 7,
+    "threads": 2,
+    "sha256": "813cc44639b1b27d3f80a5baf18299dbd848f260ff9910812ca55247946d2bed"
+  },
+  "parameter_count": 2615696,
+  "decoder": {
+    "passed": true,
+    "rtol": 1e-05,
+    "atol": 0.0001,
+    "shape": [
+      1,
+      84,
+      8400
+    ],
+    "max_abs_difference": 0.0001220703125,
+    "mean_abs_difference": 5.448553963560698e-08
+  },
+  "onnx": {
+    "passed": true,
+    "opsets": [
+      {
+        "domain": "",
+        "version": 20
+      }
+    ],
+    "operators": {
+      "Conv": 89,
+      "Sigmoid": 76,
+      "Mul": 76,
+      "Split": 9,
+      "Add": 14,
+      "Concat": 20,
+      "MaxPool": 3,
+      "Softmax": 1,
+      "Resize": 2
+    },
+    "outputs": [
+      {
+        "name": "pred_p3",
+        "shape": [
+          1,
+          144,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "pred_p4",
+        "shape": [
+          1,
+          144,
+          40,
+          40
+        ]
+      },
+      {
+        "name": "pred_p5",
+        "shape": [
+          1,
+          144,
+          20,
+          20
+        ]
+      }
+    ],
+    "raw_output_rtol": 0.0001,
+    "raw_output_atol": 0.001,
+    "raw_output_comparison": [
+      {
+        "name": "pred_p3",
+        "max_abs_difference": 0.0002079010009765625,
+        "mean_abs_difference": 4.209982307656901e-06
+      },
+      {
+        "name": "pred_p4",
+        "max_abs_difference": 0.0003070831298828125,
+        "mean_abs_difference": 4.4746075218426995e-06
+      },
+      {
+        "name": "pred_p5",
+        "max_abs_difference": 6.866455078125e-05,
+        "mean_abs_difference": 4.6870018195477314e-06
+      }
+    ]
+  }
+}

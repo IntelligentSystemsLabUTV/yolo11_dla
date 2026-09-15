@@ -1,0 +1,138 @@
+{
+  "pages": 8,
+  "size": "US Letter",
+  "pdf_version": "PDF 1.4",
+  "fonts": {
+    "IHAIZV+NimbusRomNo9L-Medi": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "BZIVMZ+NimbusRomNo9L-Regu": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "IXFAWU+NimbusRomNo9L-MediItal": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "AKHCZK+CMSY10": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "VDVGTR+NimbusRomNo9L-ReguItal": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "AAAAAC+Aptos-Bold": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAE+Aptos": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAG+Aptos": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAI+Aptos-Bold": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAK+Aptos-Bold": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "YEUUOC+CMR10": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "TQTHRL+StandardSymL": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "CAFSZL+CMMI10": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "DDIEWW+CMEX10": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "FKPJSN+MSBM10": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "PVTTLK+NimbusMonL-Regu": {
+      "type": "Type1",
+      "embedded": true
+    },
+    "AAAAAG+Aptos-Bold": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAI+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAK+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAM+Aptos": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAO+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAQ+Aptos-Italic": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAE+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAK+Aptos": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAM+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAO+Aptos-Bold": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAQ+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAS+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAU+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "AAAAAW+CambriaMath": {
+      "type": "TrueType",
+      "embedded": true
+    },
+    "BMQQDV+DejaVuSans": {
+      "type": "Type0",
+      "embedded": true
+    }
+  },
+  "links": 0,
+  "bookmarks": 0,
+  "author_metadata": "",
+  "overfull_boxes": 0,
+  "unresolved_references": 0,
+  "placeholders": [],
+  "scope": "Local PDF/TeX format checks only; not a scientific audit or a substitute for the submission portal checks."
+}

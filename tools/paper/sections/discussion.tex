@@ -1,0 +1,38 @@
+\section{Discussion}
+\label{sec:discussion}
+\subsection{Placement, Precision, and Application Cost}
+Fallback-disabled builds and engine inspection verify learned-graph placement;
+accuracy remains a separate criterion. The adapted GPU controls show that the
+additional GPU-to-DLA AP difference grows from 0.003 points in FP16 to 0.543
+in INT8.
+
+Relative to strict FP16, strict INT8 is $6.60\times$ faster at the engine
+boundary, $1.85\times$ faster at the application boundary, and 7.7\% lower in
+module energy, with reduced AP; it remains slower and higher-energy than
+adapted INT8 GPU. Native I/O conversion and host
+processing limit how much engine acceleration reaches the application.
+Stock INT8 fallback's severe accuracy loss further prevents interpreting its
+latency as a like-for-like detector-quality comparison.
+
+This provides an additional verified placement option for embedded robotic
+perception, with quantified operating costs; it does not establish resource
+isolation or improved concurrent-task performance.
+
+\subsection{Scope of the Evidence}
+Evidence covers one Jetson platform and TensorRT version, the nano detector,
+$640\times640$ inputs, batch one, and the tested FP16/INT8 build modes.
+Stock and adapted training budgets differ. INT8 uses one 500-image calibration
+subset; alternative calibration, quantization-aware training, and other
+precision assignments were not evaluated. The stock fallback accuracy loss
+cannot be attributed to a specific operator from these tests alone.
+
+Frame percentiles describe the measured tests, without cross-test uncertainty
+estimates. With \texttt{jetson\_clocks} disabled, frequency and scheduling
+variation affect host processing. The 100-image cycle is not a full-dataset
+timing distribution, and zero observed deadline misses do not establish hard
+real-time guarantees. Module energy is specific to the 10\,Hz operating point.
+CPU, memory, power, transfers, and runtime remain shared: strict DLA energy
+traces reach 7\% GR3D utilization in FP16 and 10\% in INT8, so placement does
+not imply GPU inactivity. ROS~2 \cite{macenski2022ros2} is present in the
+environment, but camera acquisition, transport, mapping, control, and
+concurrent-task benefits are outside the measured boundary.

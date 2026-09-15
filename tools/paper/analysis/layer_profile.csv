@@ -1,0 +1,49 @@
+configuration,name,inspector_type,category,timeMs,averageMs,medianMs,percentage
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.0/conv/Conv.../model.10/m/m.0/attn/Transpose]},Reformat,Reformat,70.5237,0.546696,0.546528,1.59331
+yolo11n-dla-gpu-fallback-fp16,{ForeignNode[/model.0/conv/Conv.../model.10/m/m.0/attn/Transpose]},DLA,DLA,1882.82,14.5955,14.5808,42.5377
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.10/m/m.0/attn/MatMul]},Reformat,Reformat,3.44266,0.0266873,0.026656,0.0777782
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/MatMul]},Reformat,Reformat,3.42589,0.0265573,0.026528,0.0773994
+yolo11n-dla-gpu-fallback-fp16,/model_10/m/m_0/attn/MatMul_myl4_0,gemm,GPU compute,4.66397,0.0361548,0.036096,0.105371
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/Split_18...ONNXTRT_ShapeShuffle_21 + /model.10/m/m.0/attn/Transpose_1]},Reformat,Reformat,29.0044,0.22484,0.224768,0.655282
+yolo11n-dla-gpu-fallback-fp16,{ForeignNode[/model.10/m/m.0/attn/Split_18...ONNXTRT_ShapeShuffle_21 + /model.10/m/m.0/attn/Transpose_1]},DLA,DLA,676.359,5.2431,5.22074,15.2807
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.10/m/m.0/attn/MatMul_1]},Reformat,Reformat,4.52464,0.0350747,0.035072,0.102223
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/MatMul_1]},Reformat,Reformat,23.4832,0.18204,0.182144,0.530544
+yolo11n-dla-gpu-fallback-fp16,/model_10/m/m_0/attn/MatMul_1_myl9_0,gemm,GPU compute,4.98803,0.0386669,0.038656,0.112692
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 2 to {ForeignNode[/model.10/Split.../model.23/cv2.2/cv2.2.2/Conv]},Reformat,Reformat,6.77005,0.052481,0.052448,0.152952
+yolo11n-dla-gpu-fallback-fp16,{ForeignNode[/model.10/Split.../model.23/cv2.2/cv2.2.2/Conv]},DLA,DLA,1192.79,9.24642,9.23731,26.9481
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape,Reformat,Reformat,7.22218,0.0559859,0.056,0.163167
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_copy_output,Reformat,Reformat,5.97312,0.0463033,0.046336,0.134948
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_1,Reformat,Reformat,4.96016,0.0384509,0.038528,0.112062
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_1,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_1_copy_output,Reformat,Reformat,2.41629,0.0187309,0.018944,0.05459
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_2,Reformat,Reformat,2.96403,0.022977,0.023136,0.0669649
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_2,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_2_copy_output,Reformat,Reformat,2.0121,0.0155976,0.015584,0.0454583
+yolo11n-dla-gpu-fallback-fp16,/model.23/dfl/Reshape + /model.23/dfl/Transpose,Shuffle,GPU compute,14.9459,0.11586,0.115808,0.337666
+yolo11n-dla-gpu-fallback-fp16,/model.23/dfl/Softmax,CaskSoftMaxV2,GPU compute,8.69405,0.0673957,0.067296,0.19642
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/dfl/conv/Conv,Reformat,Reformat,8.00064,0.0620205,0.062016,0.180755
+yolo11n-dla-gpu-fallback-fp16,/model.23/dfl/conv/Conv,CaskConvolution,GPU compute,6.35389,0.0492549,0.049152,0.14355
+yolo11n-dla-gpu-fallback-fp16,/model.23/Constant_12_output_0,Constant,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Constant_13_output_0,Constant,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/dfl/Reshape_1,Reformat,Reformat,2.95872,0.0229358,0.022944,0.0668449
+yolo11n-dla-gpu-fallback-fp16,/model.23/dfl/Reshape_1,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,{ForeignNode[/model.23/cv3.0/cv3.0.0/cv3.0.0.0/conv/Conv.../model.23/cv3.2/cv3.2.2/Conv]},DLA,DLA,407.51,3.15899,3.15613,9.20668
+yolo11n-dla-gpu-fallback-fp16,PWN(/model.23/Sub),PointWiseV2,GPU compute,2.36586,0.01834,0.018272,0.0534506
+yolo11n-dla-gpu-fallback-fp16,PWN(/model.23/Add_1),PointWiseV2,GPU compute,2.40669,0.0186565,0.018624,0.0543731
+yolo11n-dla-gpu-fallback-fp16,/model.23/Constant_15_output_0 + ONNXTRT_Broadcast_109,Constant,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_3,Reformat,Reformat,9.36784,0.0726189,0.072576,0.211643
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_3,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_3_copy_output,Reformat,Reformat,6.99821,0.0542497,0.054272,0.158107
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_4,Reformat,Reformat,5.61987,0.0435649,0.04368,0.126967
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_4,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_4_copy_output,Reformat,Reformat,2.42982,0.0188358,0.018816,0.0548958
+yolo11n-dla-gpu-fallback-fp16,Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_5,Reformat,Reformat,3.12451,0.024221,0.024192,0.0705906
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_5,NoOp,metadata/no-op,0,0,0,0
+yolo11n-dla-gpu-fallback-fp16,/model.23/Reshape_5_copy_output,Reformat,Reformat,1.98179,0.0153627,0.01536,0.0447737
+yolo11n-dla-gpu-fallback-fp16,"PWN(/model.23/Constant_14_output_0 + ONNXTRT_Broadcast_107, PWN(PWN(/model.23/Add_2), PWN(/model.23/Div_1)))",PointWiseV2,GPU compute,2.3289,0.0180535,0.017824,0.0526156
+yolo11n-dla-gpu-fallback-fp16,PWN(/model.23/Sigmoid),PointWiseV2,GPU compute,6.2823,0.0487,0.04864,0.141933
+yolo11n-dla-gpu-fallback-fp16,PWN(/model.23/Sub_1),PointWiseV2,GPU compute,1.99651,0.0154768,0.015488,0.0451062
+yolo11n-dla-gpu-fallback-fp16,PWN(/model.23/Mul_2),PointWiseV2,GPU compute,2.55939,0.0198403,0.019776,0.0578231
+yolo11n-dla-gpu-fallback-fp16,/model.23/Mul_2_output_0 copy,Reformat,Reformat,1.97571,0.0153156,0.015296,0.0446363
+yolo11n-dla-strict-dla-fp16,{ForeignNode[/model.0/conv/Conv.../model.23/Concat_2]},DLA,DLA,3681.41,26.8716,26.8397,100

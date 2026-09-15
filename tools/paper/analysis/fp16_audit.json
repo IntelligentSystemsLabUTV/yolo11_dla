@@ -1,0 +1,1208 @@
+{
+  "scope": "YOLO11n baseline and YOLO11-DLA-n only; custom YOLO-DLA excluded",
+  "benchmark_date": "2026-08-25",
+  "hardware_recorded": {
+    "device": "Orin",
+    "compute_capability": "8.7",
+    "SMs": 16,
+    "global_memory_MiB": 62840,
+    "memory_bus_bits": 256,
+    "TensorRT": "10.3.0",
+    "DLA_core": 0,
+    "reported_application_compute_clock_GHz": 1.3,
+    "reported_application_memory_clock_GHz": 0.816,
+    "clock_caveat": "The logs explicitly state application clock rates do not reflect actual running rates."
+  },
+  "hardware_missing": [
+    "exact module SKU and carrier",
+    "JetPack/L4T",
+    "CUDA/cuDNN versions",
+    "nvpmodel power mode",
+    "jetson_clocks policy",
+    "measured CPU/GPU/DLA/EMC clocks",
+    "thermal and ambient state",
+    "power/energy measurements"
+  ],
+  "measurement_boundary": "trtexec Latency = H2D + device interval + D2H; not synchronized image-to-detection wall latency; device interval is called GPU Compute Time even when DLA executes it",
+  "trace_policy": "JSON length equals reported post-warmup trace length. No second warmup cut; enqueue may precede 2000ms for a query whose compute starts after warmup.",
+  "quantile_policy": "Report trtexec log percentiles; reconstruct with sorted[floor(n*p/100)]. JSON also contains NumPy interpolated percentiles for comparison.",
+  "replication_limit": "One benchmark process/run per configuration; query percentiles describe within-run variation, not uncertainty across independent runs.",
+  "throughput_limit": "Reported saturated/pipelined queries per second is not 1000/median latency and is not sequential image-to-detection rate.",
+  "runs": [
+    {
+      "id": "yolo11n-gpu-fp16",
+      "model": "YOLO11n",
+      "execution": "GPU",
+      "source_onnx_basename": "yolo11n.onnx",
+      "build_command": "trtexec --onnx=logs/paper/yolo11n.onnx --saveEngine=logs/paper/fp16_matrix/yolo11n-gpu-fp16.engine --fp16 --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=logs/paper/fp16_matrix/yolo11n-gpu-fp16.layers.json --skipInference",
+      "benchmark_command": "trtexec --loadEngine=logs/paper/fp16_matrix/yolo11n-gpu-fp16.engine --warmUp=2000 --duration=30 --useSpinWait --exportTimes=logs/paper/fp16_matrix/yolo11n-gpu-fp16.times.json",
+      "build_passed": true,
+      "gpu_fallback_permitted": false,
+      "engine_bytes": 8550228,
+      "timed_queries": 8651,
+      "timed_wall_seconds": 30.0098,
+      "throughput_qps_reported": 288.273,
+      "warmup_queries": 552,
+      "warmup_ms": 2000,
+      "trace_stats_ms": {
+        "latencyMs": {
+          "n": 8651,
+          "min": 3.67188,
+          "mean": 3.740709751473818,
+          "median": 3.74023,
+          "p95": 3.75293,
+          "p99": 3.75781,
+          "max": 3.77344,
+          "p95_numpy_linear": 3.75293,
+          "p99_numpy_linear": 3.75781
+        },
+        "computeMs": {
+          "n": 8651,
+          "min": 3.43945,
+          "mean": 3.4667243879320306,
+          "median": 3.4668,
+          "p95": 3.47583,
+          "p99": 3.47949,
+          "max": 3.48633,
+          "p95_numpy_linear": 3.4757100000000003,
+          "p99_numpy_linear": 3.47949
+        },
+        "h2dMs": {
+          "n": 8651,
+          "min": 0.123047,
+          "mean": 0.1641871810195353,
+          "median": 0.164062,
+          "p95": 0.166992,
+          "p99": 0.171875,
+          "max": 0.197266,
+          "p95_numpy_linear": 0.166992,
+          "p99_numpy_linear": 0.171875
+        },
+        "d2hMs": {
+          "n": 8651,
+          "min": 0.0664062,
+          "mean": 0.10979781618310021,
+          "median": 0.109375,
+          "p95": 0.117188,
+          "p99": 0.119141,
+          "max": 0.121094,
+          "p95_numpy_linear": 0.117188,
+          "p99_numpy_linear": 0.119141
+        }
+      },
+      "reported_stats_ms": {
+        "latencyMs": {
+          "min": 3.67188,
+          "max": 3.77344,
+          "mean": 3.74072,
+          "median": 3.74023,
+          "p95": 3.75293,
+          "p99": 3.75781
+        },
+        "computeMs": {
+          "min": 3.43945,
+          "max": 3.48633,
+          "mean": 3.46673,
+          "median": 3.4668,
+          "p95": 3.47583,
+          "p99": 3.47949
+        },
+        "h2dMs": {
+          "min": 0.123047,
+          "max": 0.197266,
+          "mean": 0.164187,
+          "median": 0.164062,
+          "p95": 0.166992,
+          "p99": 0.171875
+        },
+        "d2hMs": {
+          "min": 0.0664062,
+          "max": 0.121094,
+          "mean": 0.109798,
+          "median": 0.109375,
+          "p95": 0.117188,
+          "p99": 0.119141
+        }
+      },
+      "trace_latency_component_sum_max_error_ms": 1.0000000000565112e-05,
+      "first_start_enqueue_ms": 2000.49,
+      "first_start_compute_ms": 2003.23,
+      "layer_type_counts": {
+        "Constant": 3,
+        "Reformat": 59,
+        "CaskConvolution": 62,
+        "NoOp": 26,
+        "PointWiseV2": 19,
+        "CaskJitConv": 11,
+        "CaskGemmConvolution": 12,
+        "CaskPooling": 3,
+        "shape_call": 1,
+        "kgen": 4,
+        "gemm": 2,
+        "Resize": 2,
+        "Shuffle": 3,
+        "CaskSoftMaxV2": 1
+      },
+      "layer_category_counts": {
+        "metadata/no-op": 30,
+        "Reformat": 59,
+        "GPU compute": 119
+      },
+      "bindings": [
+        "images",
+        "output0"
+      ],
+      "strict_single_DLA_loadable": false,
+      "sources": [
+        {
+          "path": "yolo11n-gpu-fp16.build.log",
+          "sha256": "8d7b1ed6bdcf1f6a4ed2a3b16d13c33077fa0d186693b1a3ce85089339e9efd0",
+          "bytes": 239265
+        },
+        {
+          "path": "yolo11n-gpu-fp16.benchmark.log",
+          "sha256": "789a3e49838d1a4706622f39ff7cb890cc245200433f4e6ce64e7e03c3e74e07",
+          "bytes": 53619
+        },
+        {
+          "path": "yolo11n-gpu-fp16.times.json",
+          "sha256": "6da6058f61114899a83ee8a1da4daabe5bbc0cd85bdbbea4b8f1513119c0eee5",
+          "bytes": 2432790
+        },
+        {
+          "path": "yolo11n-gpu-fp16.layers.json",
+          "sha256": "0bacc59b7b263dc599d28cf8e3670437fc9a3073158d215c9d2aacd32fff97b2",
+          "bytes": 267652
+        },
+        {
+          "path": "yolo11n-gpu-fp16.engine",
+          "sha256": "20121ea39430be4ec5ef1453ccd00fe3b81022ee8d539dfd4750ef3e92f2091c",
+          "bytes": 8550228
+        }
+      ]
+    },
+    {
+      "id": "yolo11n-dla-gpu-fp16",
+      "model": "YOLO11-DLA-n",
+      "execution": "GPU",
+      "source_onnx_basename": "yolo11n-dla.onnx",
+      "build_command": "trtexec --onnx=logs/paper/yolo11n-dla.onnx --saveEngine=logs/paper/fp16_matrix/yolo11n-dla-gpu-fp16.engine --fp16 --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=logs/paper/fp16_matrix/yolo11n-dla-gpu-fp16.layers.json --skipInference",
+      "benchmark_command": "trtexec --loadEngine=logs/paper/fp16_matrix/yolo11n-dla-gpu-fp16.engine --warmUp=2000 --duration=30 --useSpinWait --exportTimes=logs/paper/fp16_matrix/yolo11n-dla-gpu-fp16.times.json",
+      "build_passed": true,
+      "gpu_fallback_permitted": false,
+      "engine_bytes": 8282452,
+      "timed_queries": 9519,
+      "timed_wall_seconds": 30.0088,
+      "throughput_qps_reported": 317.207,
+      "warmup_queries": 605,
+      "warmup_ms": 2000,
+      "trace_stats_ms": {
+        "latencyMs": {
+          "n": 9519,
+          "min": 3.40039,
+          "mean": 3.500645304128585,
+          "median": 3.5,
+          "p95": 3.51172,
+          "p99": 3.51562,
+          "max": 3.53418,
+          "p95_numpy_linear": 3.51172,
+          "p99_numpy_linear": 3.51562
+        },
+        "computeMs": {
+          "n": 9519,
+          "min": 3.12891,
+          "mean": 3.1504144889169035,
+          "median": 3.15039,
+          "p95": 3.16016,
+          "p99": 3.16406,
+          "max": 3.17383,
+          "p95_numpy_linear": 3.16016,
+          "p99_numpy_linear": 3.16406
+        },
+        "h2dMs": {
+          "n": 9519,
+          "min": 0.123535,
+          "mean": 0.1479337336905137,
+          "median": 0.148438,
+          "p95": 0.152344,
+          "p99": 0.154297,
+          "max": 0.163086,
+          "p95_numpy_linear": 0.152344,
+          "p99_numpy_linear": 0.154297
+        },
+        "d2hMs": {
+          "n": 9519,
+          "min": 0.119141,
+          "mean": 0.20229665542599012,
+          "median": 0.202148,
+          "p95": 0.205078,
+          "p99": 0.208008,
+          "max": 0.214844,
+          "p95_numpy_linear": 0.205078,
+          "p99_numpy_linear": 0.208008
+        }
+      },
+      "reported_stats_ms": {
+        "latencyMs": {
+          "min": 3.40039,
+          "max": 3.53418,
+          "mean": 3.50063,
+          "median": 3.5,
+          "p95": 3.51172,
+          "p99": 3.51562
+        },
+        "computeMs": {
+          "min": 3.12891,
+          "max": 3.17383,
+          "mean": 3.15043,
+          "median": 3.15039,
+          "p95": 3.16016,
+          "p99": 3.16406
+        },
+        "h2dMs": {
+          "min": 0.123535,
+          "max": 0.163086,
+          "mean": 0.147934,
+          "median": 0.148438,
+          "p95": 0.152344,
+          "p99": 0.154297
+        },
+        "d2hMs": {
+          "min": 0.119141,
+          "max": 0.214844,
+          "mean": 0.202297,
+          "median": 0.202148,
+          "p95": 0.205078,
+          "p99": 0.208008
+        }
+      },
+      "trace_latency_component_sum_max_error_ms": 1.0000000000509601e-05,
+      "first_start_enqueue_ms": 2000.55,
+      "first_start_compute_ms": 2002.89,
+      "layer_type_counts": {
+        "Reformat": 50,
+        "CaskConvolution": 60,
+        "NoOp": 35,
+        "PointWiseV2": 13,
+        "CaskJitConv": 11,
+        "CaskGemmConvolution": 15,
+        "CaskPooling": 3,
+        "CaskSoftMaxV2": 1,
+        "Resize": 2
+      },
+      "layer_category_counts": {
+        "Reformat": 50,
+        "GPU compute": 105,
+        "metadata/no-op": 35
+      },
+      "bindings": [
+        "images",
+        "pred_p3",
+        "pred_p4",
+        "pred_p5"
+      ],
+      "strict_single_DLA_loadable": false,
+      "sources": [
+        {
+          "path": "yolo11n-dla-gpu-fp16.build.log",
+          "sha256": "0ded11d814407f72cc6b1dc395072b4310d783bc98bf4ad1a911867c4a24b857",
+          "bytes": 232414
+        },
+        {
+          "path": "yolo11n-dla-gpu-fp16.benchmark.log",
+          "sha256": "8e71362cd2f815d99e3f980cc53e46f5d31d7e46eb0281f6ea20368ded64e533",
+          "bytes": 53759
+        },
+        {
+          "path": "yolo11n-dla-gpu-fp16.times.json",
+          "sha256": "3e6ef1cac73a72cc05f9bd8d843502dbe9f655d86cf7a59de65fb837470e0f45",
+          "bytes": 2675308
+        },
+        {
+          "path": "yolo11n-dla-gpu-fp16.layers.json",
+          "sha256": "3a5fc6c1ccf7e79349df45b7b6ce983a1df56e1c92566ce7533a352cbe632b2a",
+          "bytes": 258197
+        },
+        {
+          "path": "yolo11n-dla-gpu-fp16.engine",
+          "sha256": "979b71078c9421d76c2eddb574342e51a8050b166ee24e2138a92b400abbe8f5",
+          "bytes": 8282452
+        }
+      ]
+    },
+    {
+      "id": "yolo11n-dla-gpu-fallback-fp16",
+      "model": "YOLO11n",
+      "execution": "DLA+GPU fallback",
+      "source_onnx_basename": "yolo11n.onnx",
+      "build_command": "trtexec --onnx=logs/paper/yolo11n.onnx --saveEngine=logs/paper/fp16_matrix/yolo11n-dla-gpu-fallback-fp16.engine --useDLACore=0 --allowGPUFallback --fp16 --inputIOFormats=fp16:chw --outputIOFormats=fp16:chw --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=logs/paper/fp16_matrix/yolo11n-dla-gpu-fallback-fp16.layers.json --skipInference --verbose",
+      "benchmark_command": "trtexec --loadEngine=logs/paper/fp16_matrix/yolo11n-dla-gpu-fallback-fp16.engine --useDLACore=0 --warmUp=2000 --duration=30 --useSpinWait --exportTimes=logs/paper/fp16_matrix/yolo11n-dla-gpu-fallback-fp16.times.json",
+      "build_passed": true,
+      "gpu_fallback_permitted": true,
+      "engine_bytes": 7190740,
+      "timed_queries": 878,
+      "timed_wall_seconds": 30.1006,
+      "throughput_qps_reported": 29.1688,
+      "warmup_queries": 57,
+      "warmup_ms": 2000,
+      "trace_stats_ms": {
+        "latencyMs": {
+          "n": 878,
+          "min": 34.623,
+          "mean": 34.720568906605926,
+          "median": 34.6777,
+          "p95": 34.9419,
+          "p99": 34.9863,
+          "max": 35.0195,
+          "p95_numpy_linear": 34.941475000000004,
+          "p99_numpy_linear": 34.984067
+        },
+        "computeMs": {
+          "n": 878,
+          "min": 34.1445,
+          "mean": 34.24163325740319,
+          "median": 34.19845,
+          "p95": 34.4629,
+          "p99": 34.5059,
+          "max": 34.5391,
+          "p95_numpy_linear": 34.462475000000005,
+          "p99_numpy_linear": 34.5059
+        },
+        "h2dMs": {
+          "n": 878,
+          "min": 0.300781,
+          "mean": 0.30292534738041005,
+          "median": 0.302734,
+          "p95": 0.304688,
+          "p99": 0.314453,
+          "max": 0.32666,
+          "p95_numpy_linear": 0.304688,
+          "p99_numpy_linear": 0.31370148000000003
+        },
+        "d2hMs": {
+          "n": 878,
+          "min": 0.171875,
+          "mean": 0.17601050911161734,
+          "median": 0.175781,
+          "p95": 0.177734,
+          "p99": 0.177734,
+          "max": 0.177734,
+          "p95_numpy_linear": 0.177734,
+          "p99_numpy_linear": 0.177734
+        }
+      },
+      "reported_stats_ms": {
+        "latencyMs": {
+          "min": 34.623,
+          "max": 35.0195,
+          "mean": 34.7206,
+          "median": 34.6777,
+          "p95": 34.9419,
+          "p99": 34.9863
+        },
+        "computeMs": {
+          "min": 34.1445,
+          "max": 34.5391,
+          "mean": 34.2416,
+          "median": 34.1985,
+          "p95": 34.4629,
+          "p99": 34.5059
+        },
+        "h2dMs": {
+          "min": 0.300781,
+          "max": 0.32666,
+          "mean": 0.302926,
+          "median": 0.302734,
+          "p95": 0.304688,
+          "p99": 0.314453
+        },
+        "d2hMs": {
+          "min": 0.171875,
+          "max": 0.177734,
+          "mean": 0.176011,
+          "median": 0.175781,
+          "p95": 0.177734,
+          "p99": 0.177734
+        }
+      },
+      "trace_latency_component_sum_max_error_ms": 9.200000000267328e-05,
+      "first_start_enqueue_ms": 1979.15,
+      "first_start_compute_ms": 2012.61,
+      "layer_type_counts": {
+        "Reformat": 22,
+        "DLA": 4,
+        "gemm": 2,
+        "NoOp": 7,
+        "Shuffle": 1,
+        "CaskSoftMaxV2": 1,
+        "CaskConvolution": 1,
+        "Constant": 3,
+        "PointWiseV2": 6
+      },
+      "layer_category_counts": {
+        "Reformat": 22,
+        "DLA": 4,
+        "GPU compute": 11,
+        "metadata/no-op": 10
+      },
+      "bindings": [
+        "images",
+        "output0"
+      ],
+      "strict_single_DLA_loadable": false,
+      "sources": [
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.build.log",
+          "sha256": "9f2dfd0648898fcb37e477284c17a7fb78a859fd443f3f9a8533f9de5756215d",
+          "bytes": 1628818
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.benchmark.log",
+          "sha256": "7e4c0173f7bbe1430721b06c41799bae8b6a0c4b414bfcc215012159ffc65dfc",
+          "bytes": 16495
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.times.json",
+          "sha256": "cde82d3e42f3c99bffdcec5ffff24d9e52627226ecb3e77cd03aa8da80bbffe8",
+          "bytes": 246933
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.layers.json",
+          "sha256": "ec412342cdba9059ecb0ee2fc5aa8871d0b253c42babd9fdd5f67d42e5a9c1b5",
+          "bytes": 37494
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.engine",
+          "sha256": "eec5aec19b9e41265237c89883906c49720435901760963f972cdb1d4fa94039",
+          "bytes": 7190740
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.profile.json",
+          "sha256": "906fa247b779eef8d58d2db1bc9655866a1ee428cf2c4e1045564d3a00f497b9",
+          "bytes": 7303
+        },
+        {
+          "path": "yolo11n-dla-gpu-fallback-fp16.profile.log",
+          "sha256": "7df431675b8b1a8c2ab8717b44a4fc6d002de0d6c317b05589365ebf2e2ffaa7",
+          "bytes": 12699
+        }
+      ],
+      "profile": {
+        "separate_run": true,
+        "profile_count": 129,
+        "aggregates": {
+          "DLA": {
+            "entries": 4,
+            "average_ms": 32.24401,
+            "percentage": 93.97318
+          },
+          "Reformat": {
+            "entries": 22,
+            "average_ms": 1.6215468,
+            "percentage": 4.725892099999999
+          },
+          "GPU compute": {
+            "entries": 11,
+            "average_ms": 0.44639940000000006,
+            "percentage": 1.3010006
+          },
+          "metadata/no-op": {
+            "entries": 10,
+            "average_ms": 0.0,
+            "percentage": 0.0
+          }
+        },
+        "entries": [
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.0/conv/Conv.../model.10/m/m.0/attn/Transpose]}",
+            "timeMs": 70.5237,
+            "averageMs": 0.546696,
+            "medianMs": 0.546528,
+            "percentage": 1.59331,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "{ForeignNode[/model.0/conv/Conv.../model.10/m/m.0/attn/Transpose]}",
+            "timeMs": 1882.82,
+            "averageMs": 14.5955,
+            "medianMs": 14.5808,
+            "percentage": 42.5377,
+            "category": "DLA",
+            "inspector_type": "DLA"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.10/m/m.0/attn/MatMul]}",
+            "timeMs": 3.44266,
+            "averageMs": 0.0266873,
+            "medianMs": 0.026656,
+            "percentage": 0.0777782,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/MatMul]}",
+            "timeMs": 3.42589,
+            "averageMs": 0.0265573,
+            "medianMs": 0.026528,
+            "percentage": 0.0773994,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model_10/m/m_0/attn/MatMul_myl4_0",
+            "timeMs": 4.66397,
+            "averageMs": 0.0361548,
+            "medianMs": 0.036096,
+            "percentage": 0.105371,
+            "category": "GPU compute",
+            "inspector_type": "gemm"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/Split_18...ONNXTRT_ShapeShuffle_21 + /model.10/m/m.0/attn/Transpose_1]}",
+            "timeMs": 29.0044,
+            "averageMs": 0.22484,
+            "medianMs": 0.224768,
+            "percentage": 0.655282,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "{ForeignNode[/model.10/m/m.0/attn/Split_18...ONNXTRT_ShapeShuffle_21 + /model.10/m/m.0/attn/Transpose_1]}",
+            "timeMs": 676.359,
+            "averageMs": 5.2431,
+            "medianMs": 5.22074,
+            "percentage": 15.2807,
+            "category": "DLA",
+            "inspector_type": "DLA"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to {ForeignNode[/model.10/m/m.0/attn/MatMul_1]}",
+            "timeMs": 4.52464,
+            "averageMs": 0.0350747,
+            "medianMs": 0.035072,
+            "percentage": 0.102223,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 1 to {ForeignNode[/model.10/m/m.0/attn/MatMul_1]}",
+            "timeMs": 23.4832,
+            "averageMs": 0.18204,
+            "medianMs": 0.182144,
+            "percentage": 0.530544,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model_10/m/m_0/attn/MatMul_1_myl9_0",
+            "timeMs": 4.98803,
+            "averageMs": 0.0386669,
+            "medianMs": 0.038656,
+            "percentage": 0.112692,
+            "category": "GPU compute",
+            "inspector_type": "gemm"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 2 to {ForeignNode[/model.10/Split.../model.23/cv2.2/cv2.2.2/Conv]}",
+            "timeMs": 6.77005,
+            "averageMs": 0.052481,
+            "medianMs": 0.052448,
+            "percentage": 0.152952,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "{ForeignNode[/model.10/Split.../model.23/cv2.2/cv2.2.2/Conv]}",
+            "timeMs": 1192.79,
+            "averageMs": 9.24642,
+            "medianMs": 9.23731,
+            "percentage": 26.9481,
+            "category": "DLA",
+            "inspector_type": "DLA"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape",
+            "timeMs": 7.22218,
+            "averageMs": 0.0559859,
+            "medianMs": 0.056,
+            "percentage": 0.163167,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_copy_output",
+            "timeMs": 5.97312,
+            "averageMs": 0.0463033,
+            "medianMs": 0.046336,
+            "percentage": 0.134948,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_1",
+            "timeMs": 4.96016,
+            "averageMs": 0.0384509,
+            "medianMs": 0.038528,
+            "percentage": 0.112062,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape_1",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_1_copy_output",
+            "timeMs": 2.41629,
+            "averageMs": 0.0187309,
+            "medianMs": 0.018944,
+            "percentage": 0.05459,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_2",
+            "timeMs": 2.96403,
+            "averageMs": 0.022977,
+            "medianMs": 0.023136,
+            "percentage": 0.0669649,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape_2",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_2_copy_output",
+            "timeMs": 2.0121,
+            "averageMs": 0.0155976,
+            "medianMs": 0.015584,
+            "percentage": 0.0454583,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/dfl/Reshape + /model.23/dfl/Transpose",
+            "timeMs": 14.9459,
+            "averageMs": 0.11586,
+            "medianMs": 0.115808,
+            "percentage": 0.337666,
+            "category": "GPU compute",
+            "inspector_type": "Shuffle"
+          },
+          {
+            "name": "/model.23/dfl/Softmax",
+            "timeMs": 8.69405,
+            "averageMs": 0.0673957,
+            "medianMs": 0.067296,
+            "percentage": 0.19642,
+            "category": "GPU compute",
+            "inspector_type": "CaskSoftMaxV2"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/dfl/conv/Conv",
+            "timeMs": 8.00064,
+            "averageMs": 0.0620205,
+            "medianMs": 0.062016,
+            "percentage": 0.180755,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/dfl/conv/Conv",
+            "timeMs": 6.35389,
+            "averageMs": 0.0492549,
+            "medianMs": 0.049152,
+            "percentage": 0.14355,
+            "category": "GPU compute",
+            "inspector_type": "CaskConvolution"
+          },
+          {
+            "name": "/model.23/Constant_12_output_0",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "Constant"
+          },
+          {
+            "name": "/model.23/Constant_13_output_0",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "Constant"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/dfl/Reshape_1",
+            "timeMs": 2.95872,
+            "averageMs": 0.0229358,
+            "medianMs": 0.022944,
+            "percentage": 0.0668449,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/dfl/Reshape_1",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "{ForeignNode[/model.23/cv3.0/cv3.0.0/cv3.0.0.0/conv/Conv.../model.23/cv3.2/cv3.2.2/Conv]}",
+            "timeMs": 407.51,
+            "averageMs": 3.15899,
+            "medianMs": 3.15613,
+            "percentage": 9.20668,
+            "category": "DLA",
+            "inspector_type": "DLA"
+          },
+          {
+            "name": "PWN(/model.23/Sub)",
+            "timeMs": 2.36586,
+            "averageMs": 0.01834,
+            "medianMs": 0.018272,
+            "percentage": 0.0534506,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "PWN(/model.23/Add_1)",
+            "timeMs": 2.40669,
+            "averageMs": 0.0186565,
+            "medianMs": 0.018624,
+            "percentage": 0.0543731,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "/model.23/Constant_15_output_0 + ONNXTRT_Broadcast_109",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "Constant"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_3",
+            "timeMs": 9.36784,
+            "averageMs": 0.0726189,
+            "medianMs": 0.072576,
+            "percentage": 0.211643,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape_3",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_3_copy_output",
+            "timeMs": 6.99821,
+            "averageMs": 0.0542497,
+            "medianMs": 0.054272,
+            "percentage": 0.158107,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_4",
+            "timeMs": 5.61987,
+            "averageMs": 0.0435649,
+            "medianMs": 0.04368,
+            "percentage": 0.126967,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape_4",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_4_copy_output",
+            "timeMs": 2.42982,
+            "averageMs": 0.0188358,
+            "medianMs": 0.018816,
+            "percentage": 0.0548958,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "Reformatting CopyNode for Input Tensor 0 to /model.23/Reshape_5",
+            "timeMs": 3.12451,
+            "averageMs": 0.024221,
+            "medianMs": 0.024192,
+            "percentage": 0.0705906,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "/model.23/Reshape_5",
+            "timeMs": 0,
+            "averageMs": 0,
+            "medianMs": 0,
+            "percentage": 0,
+            "category": "metadata/no-op",
+            "inspector_type": "NoOp"
+          },
+          {
+            "name": "/model.23/Reshape_5_copy_output",
+            "timeMs": 1.98179,
+            "averageMs": 0.0153627,
+            "medianMs": 0.01536,
+            "percentage": 0.0447737,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          },
+          {
+            "name": "PWN(/model.23/Constant_14_output_0 + ONNXTRT_Broadcast_107, PWN(PWN(/model.23/Add_2), PWN(/model.23/Div_1)))",
+            "timeMs": 2.3289,
+            "averageMs": 0.0180535,
+            "medianMs": 0.017824,
+            "percentage": 0.0526156,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "PWN(/model.23/Sigmoid)",
+            "timeMs": 6.2823,
+            "averageMs": 0.0487,
+            "medianMs": 0.04864,
+            "percentage": 0.141933,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "PWN(/model.23/Sub_1)",
+            "timeMs": 1.99651,
+            "averageMs": 0.0154768,
+            "medianMs": 0.015488,
+            "percentage": 0.0451062,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "PWN(/model.23/Mul_2)",
+            "timeMs": 2.55939,
+            "averageMs": 0.0198403,
+            "medianMs": 0.019776,
+            "percentage": 0.0578231,
+            "category": "GPU compute",
+            "inspector_type": "PointWiseV2"
+          },
+          {
+            "name": "/model.23/Mul_2_output_0 copy",
+            "timeMs": 1.97571,
+            "averageMs": 0.0153156,
+            "medianMs": 0.015296,
+            "percentage": 0.0446363,
+            "category": "Reformat",
+            "inspector_type": "Reformat"
+          }
+        ],
+        "average_ms_sum": 34.311956200000004
+      }
+    },
+    {
+      "id": "yolo11n-dla-strict-dla-fp16",
+      "model": "YOLO11-DLA-n",
+      "execution": "strict DLA",
+      "source_onnx_basename": "yolo11n-dla.onnx",
+      "build_command": "trtexec --onnx=logs/paper/yolo11n-dla.onnx --saveEngine=logs/paper/fp16_matrix/yolo11n-dla-strict-dla-fp16.engine --useDLACore=0 --fp16 --inputIOFormats=fp16:dla_hwc4 --outputIOFormats=fp16:chw16 --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=logs/paper/fp16_matrix/yolo11n-dla-strict-dla-fp16.layers.json --skipInference --verbose",
+      "benchmark_command": "trtexec --loadEngine=logs/paper/fp16_matrix/yolo11n-dla-strict-dla-fp16.engine --useDLACore=0 --warmUp=2000 --duration=30 --useSpinWait --exportTimes=logs/paper/fp16_matrix/yolo11n-dla-strict-dla-fp16.times.json",
+      "build_passed": true,
+      "gpu_fallback_permitted": false,
+      "engine_bytes": 6840572,
+      "timed_queries": 1119,
+      "timed_wall_seconds": 30.0756,
+      "throughput_qps_reported": 37.2062,
+      "warmup_queries": 75,
+      "warmup_ms": 2000,
+      "trace_stats_ms": {
+        "latencyMs": {
+          "n": 1119,
+          "min": 27.4844,
+          "mean": 27.549094101876676,
+          "median": 27.5146,
+          "p95": 27.7178,
+          "p99": 27.7441,
+          "max": 27.7832,
+          "p95_numpy_linear": 27.7178,
+          "p99_numpy_linear": 27.7441
+        },
+        "computeMs": {
+          "n": 1119,
+          "min": 26.791,
+          "mean": 26.85099857015192,
+          "median": 26.8164,
+          "p95": 27.0195,
+          "p99": 27.0469,
+          "max": 27.083,
+          "p95_numpy_linear": 27.0195,
+          "p99_numpy_linear": 27.04672
+        },
+        "h2dMs": {
+          "n": 1119,
+          "min": 0.390625,
+          "mean": 0.39306249508489716,
+          "median": 0.392578,
+          "p95": 0.394531,
+          "p99": 0.398438,
+          "max": 0.411621,
+          "p95_numpy_linear": 0.394531,
+          "p99_numpy_linear": 0.398438
+        },
+        "d2hMs": {
+          "n": 1119,
+          "min": 0.302734,
+          "mean": 0.30503184897229674,
+          "median": 0.304688,
+          "p95": 0.306641,
+          "p99": 0.306641,
+          "max": 0.308594,
+          "p95_numpy_linear": 0.306641,
+          "p99_numpy_linear": 0.306641
+        }
+      },
+      "reported_stats_ms": {
+        "latencyMs": {
+          "min": 27.4844,
+          "max": 27.7832,
+          "mean": 27.5491,
+          "median": 27.5146,
+          "p95": 27.7178,
+          "p99": 27.7441
+        },
+        "computeMs": {
+          "min": 26.791,
+          "max": 27.083,
+          "mean": 26.851,
+          "median": 26.8164,
+          "p95": 27.0195,
+          "p99": 27.0469
+        },
+        "h2dMs": {
+          "min": 0.390625,
+          "max": 0.411621,
+          "mean": 0.393063,
+          "median": 0.392578,
+          "p95": 0.394531,
+          "p99": 0.398438
+        },
+        "d2hMs": {
+          "min": 0.302734,
+          "max": 0.308594,
+          "mean": 0.305032,
+          "median": 0.304688,
+          "p95": 0.306641,
+          "p99": 0.306641
+        }
+      },
+      "trace_latency_component_sum_max_error_ms": 8.89999999992841e-05,
+      "first_start_enqueue_ms": 1992.46,
+      "first_start_compute_ms": 2018.39,
+      "layer_type_counts": {
+        "DLA": 1
+      },
+      "layer_category_counts": {
+        "DLA": 1
+      },
+      "bindings": [
+        "images",
+        "pred_p3",
+        "pred_p4",
+        "pred_p5"
+      ],
+      "strict_single_DLA_loadable": true,
+      "sources": [
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.build.log",
+          "sha256": "64431bb9042e5009bd5399faab5539d6b902ed6e4c639231c3f03c172584efe2",
+          "bytes": 439337
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.benchmark.log",
+          "sha256": "a01089a57fe9a978db1230ff3bc9523d24bbdb244b3b0af6c8863e3e1e397fe3",
+          "bytes": 19727
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.times.json",
+          "sha256": "8b4c65555645f30245ff2a7228a0feaad648bf8e4e8b9e1278997941e9785555",
+          "bytes": 314929
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.layers.json",
+          "sha256": "c27535aff70943092494eeb7a5bf7f1faea348561563e8f77bb2f618afb9a22f",
+          "bytes": 944
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.engine",
+          "sha256": "94c8e0206d7393ae3a7e5203e6b08178773d46d130956ee7054d96cca5f8d81f",
+          "bytes": 6840572
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.profile.json",
+          "sha256": "956a1e1de5d35c09976f550ea31f8683a948788fce65cdff2ec23e27a6dfe793",
+          "bytes": 181
+        },
+        {
+          "path": "yolo11n-dla-strict-dla-fp16.profile.log",
+          "sha256": "df439d73fea029e67c3e29d60d28eb8f9bae9e0d10d3a87d4039f2827112a1d1",
+          "bytes": 8132
+        }
+      ],
+      "profile": {
+        "separate_run": true,
+        "profile_count": 137,
+        "aggregates": {
+          "DLA": {
+            "entries": 1,
+            "average_ms": 26.8716,
+            "percentage": 100.0
+          },
+          "Reformat": {
+            "entries": 0,
+            "average_ms": 0.0,
+            "percentage": 0.0
+          },
+          "GPU compute": {
+            "entries": 0,
+            "average_ms": 0.0,
+            "percentage": 0.0
+          },
+          "metadata/no-op": {
+            "entries": 0,
+            "average_ms": 0.0,
+            "percentage": 0.0
+          }
+        },
+        "entries": [
+          {
+            "name": "{ForeignNode[/model.0/conv/Conv.../model.23/Concat_2]}",
+            "timeMs": 3681.41,
+            "averageMs": 26.8716,
+            "medianMs": 26.8397,
+            "percentage": 100,
+            "category": "DLA",
+            "inspector_type": "DLA"
+          }
+        ],
+        "average_ms_sum": 26.8716
+      }
+    }
+  ],
+  "baseline_strict_failure": {
+    "source": {
+      "path": "yolo11n-strict-dla-fp16.build.log",
+      "sha256": "72c545b9c507c7b1d3ede8c0a44f2c274aadab72a77edd2e66ffc885cb455608",
+      "bytes": 377317
+    },
+    "failure": "First reported unsupported operator /model.10/m/m.0/attn/MatMul; fallback disabled",
+    "build_command": "trtexec --onnx=logs/paper/yolo11n.onnx --saveEngine=logs/paper/fp16_matrix/yolo11n-strict-dla-fp16.engine --useDLACore=0 --fp16 --inputIOFormats=fp16:dla_hwc4 --outputIOFormats=fp16:chw16 --profilingVerbosity=detailed --dumpLayerInfo --exportLayerInfo=logs/paper/fp16_matrix/yolo11n-strict-dla-fp16.layers.json --skipInference --verbose"
+  },
+  "derived_comparisons": {
+    "strict_vs_fallback_transfer_inclusive_median_reduction_percent": 20.656214224126746,
+    "strict_vs_fallback_throughput_increase_percent": 27.554784564329005,
+    "retrofit_vs_baseline_GPU_transfer_inclusive_median_reduction_percent": 6.422867042935865
+  },
+  "e2e_summary_only": {
+    "evidence_level": "secondary consolidated summary; corresponding YOLO11 raw E2E JSON files absent",
+    "source": {
+      "path": "FP16_RESULTS.md",
+      "sha256": "9bb1507cd2073fee1f2a3ce831f92ceebf11e4f5084b47523a638a453ef11839",
+      "bytes": 12019
+    },
+    "raw_E2E_JSON_files_present_in_input_directory": [
+      "yolo-dla-n-gpu-fp16-e2e.json",
+      "yolo-dla-n-strict-dla-fp16-e2e.json"
+    ],
+    "stage_statistic": "independently computed medians; do not add to infer total median",
+    "rows": [
+      {
+        "configuration": "YOLO11n / GPU",
+        "preprocess": 4.9,
+        "pack_h2d": 1.755,
+        "engine": 8.153,
+        "d2h_unpack": 1.088,
+        "postprocess": 3.25,
+        "total": 19.203,
+        "total_p95": 19.574,
+        "total_p99": 19.88,
+        "sequential_rate_im_s": 52.08
+      },
+      {
+        "configuration": "YOLO11n / DLA+GPU fallback",
+        "preprocess": 8.617,
+        "pack_h2d": 2.43,
+        "engine": 35.198,
+        "d2h_unpack": 1.572,
+        "postprocess": 4.866,
+        "total": 52.782,
+        "total_p95": 53.098,
+        "total_p99": 53.396,
+        "sequential_rate_im_s": 18.95
+      },
+      {
+        "configuration": "YOLO11-DLA-n / GPU",
+        "preprocess": 4.572,
+        "pack_h2d": 1.799,
+        "engine": 7.56,
+        "d2h_unpack": 2.049,
+        "postprocess": 3.717,
+        "total": 19.831,
+        "total_p95": 20.343,
+        "total_p99": 20.544,
+        "sequential_rate_im_s": 50.43
+      },
+      {
+        "configuration": "YOLO11-DLA-n / strict DLA",
+        "preprocess": 8.946,
+        "pack_h2d": 7.755,
+        "engine": 27.788,
+        "d2h_unpack": 6.237,
+        "postprocess": 5.711,
+        "total": 56.497,
+        "total_p95": 56.864,
+        "total_p99": 57.781,
+        "sequential_rate_im_s": 17.7
+      }
+    ]
+  }
+}

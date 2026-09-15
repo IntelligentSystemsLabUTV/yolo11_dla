@@ -1,0 +1,122 @@
+[
+  {
+    "previous_path": "tools/yolo_e2e_tester.py",
+    "canonical_path": "tools/yolo11_dla_paper/benchmarks/yolo_e2e_tester.py",
+    "sha256_before_migration": "d007c067ae6a9fb2cc0257113cc32d3d1cff42089a9b4f480ebdb25c546c75b8"
+  },
+  {
+    "previous_path": "tools/train_coco_dla.py",
+    "canonical_path": "tools/yolo11_dla_paper/training/train_coco_dla.py",
+    "sha256_before_migration": "96dfe8b6bba6ffbcff32ecb7cd02d95c40e2fe0fd4ea7ddd0313a3665a02c847"
+  },
+  {
+    "previous_path": "tools/coco_dla_train.sh",
+    "canonical_path": "tools/yolo11_dla_paper/training/coco_dla_train.sh",
+    "sha256_before_migration": "c8813cf6f6437299c3ed57d1192229d184d0d58d00f0c798b4d91b447a6e3eb0"
+  },
+  {
+    "previous_path": "tools/coco_results_server.sh",
+    "canonical_path": "tools/yolo11_dla_paper/training/monitoring/coco_results_server.sh",
+    "sha256_before_migration": "30cfb37c08cf3127ab7a7b6a7076241b695cbce290205ccb35d5c699594a0931"
+  },
+  {
+    "previous_path": "tools/wandb_live_sync.py",
+    "canonical_path": "tools/yolo11_dla_paper/training/monitoring/wandb_live_sync.py",
+    "sha256_before_migration": "33f022e12dba73722f40cf3aeb4956f7d4f8b141b0c35a26e26530c0fc611da1"
+  },
+  {
+    "previous_path": "tools/wandb_sync_once.py",
+    "canonical_path": "tools/yolo11_dla_paper/training/monitoring/wandb_sync_once.py",
+    "sha256_before_migration": "a3121fbfc6fba9d580191000d478b4bab2f1c3a0f96bc89edbabfa322242f1df"
+  },
+  {
+    "previous_path": "tools/wandb_live_sync.sh",
+    "canonical_path": "tools/yolo11_dla_paper/training/monitoring/wandb_live_sync.sh",
+    "sha256_before_migration": "35efee5992d4ca73143be06c19c2924e93718e101922d52ee2eb55c53b875b63"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/analyze_fp16.py",
+    "canonical_path": "tools/yolo11_dla_paper/analysis/analyze_fp16.py",
+    "sha256_before_migration": "af86a126404b8d14fe47eb629ec4a620aaed1f9dfe6d0ed6b4be5dbf8742e93e"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/extract_checkpoint.py",
+    "canonical_path": "tools/yolo11_dla_paper/analysis/extract_checkpoint.py",
+    "sha256_before_migration": "1f14101fb102fe23d5defb3e6c2d16c4b993d152d9736e1d60a4bf74f8eec603"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/evaluate_coco.py",
+    "canonical_path": "tools/yolo11_dla_paper/evaluation/evaluate_coco.py",
+    "sha256_before_migration": "5d007bd551c67a9506edcfe9de91303d1936c65934e7fb06b6483cfe02d59605"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/verify_model.py",
+    "canonical_path": "tools/yolo11_dla_paper/evaluation/verify_model.py",
+    "sha256_before_migration": "098dd31cc70fe758f6ee338dc385dfebf6f7249e02f40a2099e6bbdfb6403186"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/check_paper.py",
+    "canonical_path": "tools/yolo11_dla_paper/paper/check_paper.py",
+    "sha256_before_migration": "fe5a1d8b33b463483d2968fa9b9ef3e2015073b486fe2dcc36089806ff2b6b67"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/common.py",
+    "canonical_path": "tools/yolo11_dla_paper/common.py",
+    "sha256_before_migration": "2278843f1d8332c715292802a7735bda78e791a6989e4102f024564adaa5406b"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/prepare.py",
+    "canonical_path": "tools/yolo11_dla_paper/export/prepare.py",
+    "sha256_before_migration": "2fdf8ce5813bc4e9a5e7ad7d9aef7142d32a424924d754e35fbc9611b9bf87f9"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/validate.py",
+    "canonical_path": "tools/yolo11_dla_paper/evaluation/validate.py",
+    "sha256_before_migration": "3149058d31b13de75787df4d508bf74661c40708d5f03ed5a5273c95f36d279c"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/benchmark.py",
+    "canonical_path": "tools/yolo11_dla_paper/benchmarks/benchmark.py",
+    "sha256_before_migration": "603b37aa3e7b4dcfdb1d832971c0c1d650810d69ca90a36d8e5e254876b255fc"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/telemetry.py",
+    "canonical_path": "tools/yolo11_dla_paper/benchmarks/telemetry.py",
+    "sha256_before_migration": "d987bd5d61b98ed6be15086369e13069baacdacf4a6684445f980c9f96941299"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/suite.py",
+    "canonical_path": "tools/yolo11_dla_paper/orchestration/suite.py",
+    "sha256_before_migration": "dc45b9501441709eb8a984c6722257d421ea31e6f9b96bd452eefd07b4e9427b"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/summarize.py",
+    "canonical_path": "tools/yolo11_dla_paper/analysis/summarize.py",
+    "sha256_before_migration": "66e9f54ed21b1a744e7d993e8d5ce10fb671bc20c9457033e09d9c5913120b8c"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/test_protocol.py",
+    "canonical_path": "tools/yolo11_dla_paper/tests/test_protocol.py",
+    "sha256_before_migration": "feeac2b275b813fb10cfa1f87990c25384ce0b7246cbaf2d77b4bd4765c09030"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/README.md",
+    "canonical_path": "tools/yolo11_dla_paper/docs/JETSON_RUNBOOK.md",
+    "sha256_before_migration": "8e3eb51257cd67adb8f6f8ab6ef83261e6af6630269ec3d989480026e77c77c9"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/LOCAL_VALIDATION.md",
+    "canonical_path": "tools/yolo11_dla_paper/docs/LOCAL_VALIDATION.md",
+    "sha256_before_migration": "264df323e59ef9891ef2605a2ef7f16fb2fdfb0036bada24ad4f75fcca07cd96"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/analysis/jetson/hardware-notes.example.md",
+    "canonical_path": "tools/yolo11_dla_paper/configs/hardware-notes.example.md",
+    "sha256_before_migration": "d9d1f42dff0154cc0a69ced78616a6216a27456717c2a9b043abe8f02e145534"
+  },
+  {
+    "previous_path": "tools/YOLO11-DLA_ICRA/FINAL_TESTS.md",
+    "canonical_path": "tools/yolo11_dla_paper/docs/FINAL_TESTS.md",
+    "sha256_before_migration": "b987d450f94c393d18531ecf905d1dbd52b2bdfac0aefb5e4155ddbe5e52aa5b"
+  }
+]

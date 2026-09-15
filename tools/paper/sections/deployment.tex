@@ -1,0 +1,82 @@
+\section{Export and Runtime}
+\label{sec:deployment}
+\subsection{Exported Graph and Strict Compilation}
+The exported ONNX graph uses opset 20 and a static $1\times3\times640\times640$
+input. Inspection finds 89 convolutions, 76 sigmoid and 76 multiplication nodes,
+9 splits, 14 additions, 20 concatenations, 3 max-pooling operations, 2 resizes,
+and one softmax. There are no MatMul, Gemm, Reshape, Transpose, Div, or Slice
+operators. The sigmoid/multiplication pairs represent retained SiLU activations;
+operator counts before fusion are not execution-kernel counts.
+
+Compilation targets DLA core 0 in FP16 and calibrated INT8 with GPU fallback
+disabled and explicit native I/O formats. Successful compilation is checked against both the verbose
+placement report and the optimized-engine inspector. For each strict optimized engine,
+the inspector reports a single DLA node corresponding to one DLA loadable; this
+does not mean that the source graph contains one operation. Build and profile
+records identify engine name, compiler version, and output bindings.
+
+This placement verification is configuration-specific. TensorRT's DLA softmax support depends on
+the target and shape, and the compiler warns that the selected approximation
+can introduce numerical error \cite{nvidia_dla_working}. A source-level
+rewrite that compiles on this Orin/TensorRT combination is not sufficient
+evidence for another DLA generation, input size, or precision. Build success
+also does not validate raw-output decoding.
+
+\subsection{Native Layouts and the Host Boundary}
+\label{sec:packing}
+The FP16 strict build requests \texttt{fp16:dla\_hwc4} input and
+\texttt{fp16:chw16} outputs. The input pads three channels to four in
+interleaved storage, occupying $4\times640\times640\times2=3{,}276{,}800$
+bytes. Output channels (144) are divisible by 16, requiring no channel padding.
+The INT8 strict engine instead uses \texttt{int8:dla\_hwc4} input and
+\texttt{int8:chw32} outputs. Its input occupies 1,638,400 bytes; CHW32 pads
+144 channels to 160, totaling 1,344,000 output bytes across the three levels.
+Both input layouts satisfy the documented row alignment
+\cite{nvidia_dla_working}. GPU and stock DLA+GPU fallback engines retain linear FP16
+external bindings in both precision modes.
+
+For native INT8 bindings, the host quantizes normalized pixels as
+$q=\operatorname{clip}(\operatorname{round}(x/s),-128,127)$ and dequantizes
+raw outputs as $y=sq$. Per-tensor scales are read from the model's calibration
+cache and checked against the explicit build-time I/O ranges; engine-hash-bound
+metadata supplies the runtime scales. Thus, changing precision changes both
+arithmetic and the host I/O path, not just the serialized engine.
+
+The reference runner performs packing, unpacking, and INT8 conversion on the
+CPU. Timed input stages include packing and host-to-device (H2D) transfer;
+output stages include device-to-host (D2H) transfer, unpacking, and any
+dequantization. These are not pure layout-conversion timings. A CUDA stream
+and device-visible buffers remain necessary without GPU-assigned learned layers.
+Logical shape alone is insufficient, so formats, vectorized dimensions,
+component counts, and context strides are recorded. For the FP16 engine,
+TensorRT reports CHW4 input and CHW16 outputs; the padded input interpretation
+is validated for this shape, not for arbitrary CHW4 bindings.
+
+\subsection{Confidence-First Host Decoding}
+\label{sec:decode}
+The host splits each $P_\ell$ into 64 regression channels and 80 class channels.
+For confidence threshold $\tau\in(0,1)$, an anchor survives if
+\begin{equation}
+ \sigma\!\left(\max_c S_{\ell,c}(h,w)\right) > \tau.
+ \label{eq:threshold}
+\end{equation}
+The implementation applies sigmoid before the comparison to preserve dense
+floating-point threshold behavior. Regression decoding is independent of
+class confidence and is postponed until after rejection. For each
+survivor and box side $q\in\{l,t,r,b\}$, the DFL expectation is
+\begin{equation}
+ \hat d_q=\sum_{j=0}^{r-1}j\,
+ \frac{\exp R_{qj}}{\sum_{k=0}^{r-1}\exp R_{qk}}.
+ \label{eq:dfl}
+\end{equation}
+The decoder places cell centers at $(w+0.5,h+0.5)$, forms the four box
+coordinates from these distances, scales by the level stride, applies class
+sigmoid, and performs class-aware NMS. The final coordinates are mapped back
+through the image's letterbox transform.
+
+If $m$ of $N=8400$ anchors survive, dense class scanning remains
+$O(Nn_c)$, while the regression softmax/expectation work falls from $O(4rN)$
+to $O(4rm)$. This does not reduce raw-output transfer volume. In the FP16 strict
+10\,Hz test, surviving anchors range from 0 to 254, with median 28.5 over the
+100-image cycle. Identical threshold strictness, class selection, NMS settings,
+and tie handling are necessary for dense/sparse agreement.
