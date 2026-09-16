@@ -1,0 +1,3 @@
+[submodule "tools/ultralytics"]
+	path = tools/ultralytics
+	url = git@github.com:IntelligentSystemsLabUTV/ultralytics.git
