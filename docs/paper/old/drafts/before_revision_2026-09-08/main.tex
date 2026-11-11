@@ -1,0 +1,86 @@
+\documentclass[conference]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}  % IEEE requires Times; the class asks for ptm but sets
+                       % no math family, which leaves math in Computer Modern.
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{arrows.meta,fit,positioning}
+
+% ---------------------------------------------------------------------------
+% Placeholder macro. Every unresolved item in this manuscript is marked with
+% \TODO{...} and states which measurement would close it. Grep for "\TODO{".
+% ---------------------------------------------------------------------------
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+% ICRA 2027 uses an eight-page, double-column, double-anonymous submission
+% format (references included). Author block is intentionally absent.
+
+% ALT subtitle (if the isolation result turns out weak/ambiguous):
+%   ... : What Fixed-Function Offloading Costs and What It Returns
+% ALT subtitle: ... : Admissibility, Energy, and GPU Isolation on Jetson Orin
+\title{You Only Look Once, Elsewhere: Fixed-Function Perception Offloading
+for Energy and GPU Availability in Embedded Robots}
+
+\author{\IEEEauthorblockN{Anonymous Submission}\\
+\IEEEauthorblockA{Paper under double-anonymous review}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Perception rarely runs alone on a robot: it shares one system-on-chip with
+mapping, planning, and control. A fixed-function accelerator such as the NVIDIA
+Deep Learning Accelerator (DLA) can host the perception graph and leave the GPU
+to the rest of the system, but only if the \emph{entire} learned graph satisfies
+its execution contract over operators, tensor rank, layout, and precision. We
+therefore treat offloading itself as the decision to be evaluated, and ask what
+it costs and what it returns. We retrofit YOLO11n into YOLO11-DLA-n by
+substituting exactly two subgraphs, its attention block and its decoded output
+interface, and keeping everything else. The retrofit is admissible: TensorRT
+compiles it into a single DLA loadable with no layer assigned to the GPU,
+whereas the unmodified detector is rejected at its attention matrix
+multiplication. Admission is not free. At batch one and $640\times640$ the
+strict DLA engine takes $27.515$~ms median engine-plus-transfer time against
+$3.740$~ms for the same detector's GPU engine, a factor of $7.36$, and the
+retrofit gives up $1.72$ points of COCO $\mathrm{mAP}_{50\text{--}95}$
+($37.68$ versus $39.40$, i.e.\ $95.6\%$ retention). Partial offloading is not a
+middle ground: with GPU fallback enabled the unmodified detector splits into
+four DLA loadables, eleven GPU kernels, and 22 reformat nodes, spends $94.0\%$
+of engine time on DLA, and is still slower ($34.678$~ms) than either fully
+placed alternative. In a single-threaded reference pipeline the strict path
+measures $56.497$~ms end-to-end against $19.203$~ms for the GPU baseline, of
+which $13.992$~ms is DLA-native layout packing and unpacking that is an
+artifact of the reference implementation rather than of the accelerator. The
+offloading decision therefore rests on what strict placement returns in energy
+per frame and in GPU availability under contention: \TODO{energy and isolation
+results, Sec.~V-E; requires board-power logging across power modes and the
+concurrent-workload experiment}.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Deep learning for visual perception, embedded systems for robotics and
+automation, software--hardware integration for robot systems, computer
+architecture for robotics and automation, object detection.
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/deployment}
+\input{sections/evaluation}
+\input{sections/conclusion}
+\input{sections/acknowledgment}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

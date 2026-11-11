@@ -1,0 +1,22 @@
+\section{Discussion}
+\label{sec:discussion}
+\subsection{Where the Cost Falls}
+Engine gains can shrink or reverse at the application boundary. Strict INT8
+is $6.60\times$ faster than strict FP16 at the engine boundary, but only
+$1.85\times$ faster in the application pipeline. Its module energy is 7.7\%
+lower, and its AP is lower too. Native I/O conversion and host processing limit the application gain.
+Adapted INT8 GPU remains faster and lower-energy.
+
+The reversal is a consequence of accelerator speed rather than of its slowness.
+At FP16 the strict DLA inference stage dominated its boundaries; at INT8 a
+4.522\,ms inference stage does not. Boundary cost becomes the binding constraint
+precisely when the accelerator succeeds.
+
+Quantization changes accuracy and runtime behavior. The additional
+GPU-to-DLA AP difference grows from 0.003 points in FP16 to 0.543 in INT8.
+Stock INT8 fallback has much lower accuracy, with no isolated cause.
+
+\subsection{Scope and Transfer to Other Deployments}
+The evidence covers one Jetson/TensorRT configuration and one YOLO11-n case
+study. Stock and adapted training budgets differ.
+Transfer to other models and DLA configurations is untested.

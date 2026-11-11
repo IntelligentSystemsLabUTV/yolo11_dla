@@ -34,7 +34,7 @@ logs/int8_matrix/debug-strict-native-int8.gKgeWc/adapted-strict-int8.engine   fd
 logs/icra2027_int8/run_01/*/manifest.json + accuracy-summary/results.csv   artifact_sha256 fd530775…
 ```
 
-The eight CSVs behind the manuscript tables are hash-recorded in `tools/paper/analysis/precision_results.json`, which is tracked; the CSVs themselves are campaign output under the untracked `logs/`.
+The eight CSVs behind the published values are hash-recorded in `docs/analysis/precision_results.json`, which is tracked; the CSVs themselves are campaign output under the untracked `logs/`.
 
 The **stock** side of the chain is weaker by construction. `logs/yolo11n.onnx` (`a771561a…`) is the export that every stock engine was built from, and it is consistent across the calibration manifests and build commands, but the identity of the upstream `yolo11n.pt` checkpoint it came from was never recovered. Any stock-versus-adapted AP difference therefore mixes architecture, training budget and checkpoint provenance; the adapted GPU engine, not the stock model, is the controlled comparison for placement.
 
@@ -46,7 +46,7 @@ Three of these were found during the evidence audit and are worth repeating, bec
 2. **The only end-to-end JSON records kept in `fp16_matrix/` belong to the independent YOLO-DLA family**, which is outside the paper's scope. They cannot be used to fill YOLO11-DLA rows.
 3. **`dla_yolo11n*.md` in the development workspace documents segmentation at 512×512**, an earlier phase of the work, not the 640×640 detection results of the paper. `best-mAP50-95_0.37395.pt` is named after a value its own contents do not confirm. Neither belongs to this study.
 
-Historical absolute paths are preserved faithfully in the archived records rather than rewritten: the original TensorRT logs refer to `logs/paper/fp16_matrix/…`, which does not correspond to any current directory, and the Jetson container mounted the workspace at `/home/neo/workspace`. Those strings are provenance, not usable paths.
+Historical absolute paths are preserved faithfully in the archived records rather than rewritten: the original TensorRT logs refer to `logs/paper/fp16_matrix/…`, which does not correspond to any current directory, and the remaining absolute paths are the container's own mount point on the Jetson. Those strings are provenance, not usable paths.
 
 ## Command archive
 
@@ -64,7 +64,7 @@ These are host-side regression tests of the harness, run without an accelerator.
 - The energy collector was exercised against a simulated `tegrastats` process, including the correct rejection of a source exposing only one rail.
 - `compileall` and `pyflakes` pass. Flake8 in the development environment has a plugin conflict on `--application-import-names`, so static checking was done with pyflakes directly.
 - The COCO evaluator's CPU branch was smoke-tested against an explicitly synthetic single-image annotation; that AP is a fixture, not a result.
-- PDF preflight (`make -C tools/paper check`): eight pages, US Letter, 14 embedded fonts, no Type 3 fonts, no links, no bookmarks, no overfull boxes, no unresolved references, empty author metadata.
+- PDF preflight (`run.py check-paper`): eight pages, US Letter, embedded fonts, no Type 3 fonts, no links, no bookmarks, no overfull boxes, no unresolved references, empty author metadata.
 
 ## Limitations
 
@@ -82,15 +82,18 @@ These are host-side regression tests of the harness, run without an accelerator.
 
 **Environment.** ROS 2 Jazzy is present on the platform but camera acquisition, transport, mapping, control and any robot-level integration are outside the measured boundary. The benchmark is a standalone runner, not a ROS 2 node, and a COCO image sequence is not a rosbag.
 
+## Redacted metadata in `weights/`
+
+The two files under `weights/` are the as-built artifacts with the local filesystem paths and the source repository URL inside them replaced by `<redacted>`, which is why their file hashes differ from the as-built ones. Nothing else was changed: the checkpoint's parameters and the ONNX graph are bit-identical, and both invariants are tabulated in [`BUILD.md`](BUILD.md). The records under `docs/analysis/` keep the original values.
+
 ## Detailed audits
 
-The long-form audits are preserved verbatim under [`../tools/paper/audits/`](../tools/paper/audits/):
+The long-form audits are preserved verbatim under [`../analysis/audits/`](docs/analysis/audits/):
 
 | File | Contents |
 |---|---|
 | `EVIDENCE_AUDIT.md` | Source and provenance audit of the historical FP16 evidence, measurement definitions, quantitative findings and statistical limits |
 | `MODEL_AUDIT.md` | Implementation provenance, training discrepancies and runtime caveats |
 | `PRECISION_UPDATE.md` | Sources, interpretation and reproduction commands for the combined FP16/INT8 results |
-| `REFERENCE_AUDIT.md` | Primary-source verification of every citation |
-| `GUIDELINES.md` | Submission requirements the manuscript was prepared against |
-| `NOTES.md` | Revision record of the manuscript, including corrections made to earlier claims |
+
+The editorial audits sit with the manuscript in [`../docs/paper/audits/`](paper/audits/): `REFERENCE_AUDIT.md` (primary-source verification of every citation), `GUIDELINES.md` (submission requirements), `NOTES.md` (revision record), `FINAL_TESTS.md` and `REFRAMING_PROPOSAL.md`.

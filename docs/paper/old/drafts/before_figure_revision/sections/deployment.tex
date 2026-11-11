@@ -1,0 +1,83 @@
+\section{Export and Runtime}
+\label{sec:deployment}
+\subsection{Exported Graph and Strict Compilation}
+The retained ONNX artifact uses opset 20 and a static $1\times3\times640\times640$
+input. Inspection finds 89 convolutions, 76 sigmoid and 76 multiplication nodes,
+9 splits, 14 additions, 20 concatenations, 3 max-pooling operations, 2 resizes,
+and one softmax. There are no MatMul, Gemm, Reshape, Transpose, Div, or Slice
+operators. The sigmoid/multiplication pairs represent retained SiLU activations;
+operator counts before fusion are not execution-kernel counts.
+
+Compilation targets DLA core 0 in FP16 with GPU fallback disabled and explicit
+native I/O formats. Successful compilation is checked against both the verbose
+placement report and the optimized-engine inspector. A one-node DLA inspector
+result is evidence of a single compiled loadable, not a claim that the original
+network contains one operation. The build and profile records remain linked to
+the engine name, compiler version, and output bindings.
+
+This audit is configuration-specific. TensorRT's DLA softmax support depends on
+the target and shape, and the compiler warns that the selected approximation
+can introduce numerical error \cite{nvidia_dla_working}. A source-level
+rewrite that compiles on this Orin/TensorRT combination is not sufficient
+evidence for another DLA generation, input size, or precision. Build success
+also does not validate raw-output decoding.
+
+\subsection{Native Layouts and the Host Boundary}
+\label{sec:packing}
+The strict build requests \texttt{fp16:dla\_hwc4} input and
+\texttt{fp16:chw16} outputs. Its inspector describes a DLA image input format
+and sixteen-channel-vectorized outputs. For this three-channel image, the
+physical input buffer pads channels to four and uses interleaved pixel storage;
+the $640$-pixel row satisfies the documented 64-byte alignment. The buffer
+occupies $4\times640\times640\times2=3{,}276{,}800$ bytes. Each output has
+144 channels, already divisible by 16, so CHW16 requires no extra channel
+padding.
+
+The reference runner converts between these buffers and logical NCHW tensors
+on the CPU using tensor views, permutations, materialization, and copies.
+Its timed stages include both packing and H2D transfer at the input, and both
+D2H transfer and unpacking at the output. They cannot be interpreted as pure
+layout-conversion timings. A CUDA stream and device-visible buffers are still
+used for execution and transfer even when the learned graph has no GPU layers.
+
+Logical shape is insufficient to allocate or interpret a native binding.
+Runtime validation must record format descriptions, vectorized dimensions,
+components per element, and context strides, then test the corresponding
+packing rules. The retained summary uses a CHW4 shorthand for the input;
+we follow the build's requested DLA format and require a runtime record before
+treating format names as interchangeable.
+\missing{P4}{archive binding formats/strides and raw multi-image timing records}.
+
+\subsection{Confidence-First Host Decoding}
+\label{sec:decode}
+The host splits each $P_\ell$ into 64 regression channels and 80 class channels.
+For confidence threshold $\tau\in(0,1)$, an anchor survives if
+\begin{equation}
+ \max_c S_{\ell,c}(h,w) > \log\frac{\tau}{1-\tau}.
+ \label{eq:threshold}
+\end{equation}
+This is equivalent in exact arithmetic to applying sigmoid and then the same
+maximum-class threshold. Regression decoding is independent of class
+confidence, so it can be postponed until after this rejection step. For each
+survivor and box side $q\in\{l,t,r,b\}$, the DFL expectation is
+\begin{equation}
+ \hat d_q=\sum_{j=0}^{r-1}j\,
+ \frac{\exp R_{qj}}{\sum_{k=0}^{r-1}\exp R_{qk}}.
+ \label{eq:dfl}
+\end{equation}
+The decoder places cell centers at $(w+0.5,h+0.5)$, forms the four box
+coordinates from these distances, scales by the level stride, applies class
+sigmoid, and performs class-aware NMS. The final coordinates are mapped back
+through the image's letterbox transform.
+
+If $m$ of $N=8400$ anchors survive, dense class scanning remains
+$O(Nn_c)$, while the regression softmax/expectation work falls from $O(4rN)$
+to $O(4rm)$. This does not reduce raw-output transfer volume. The repeated-image
+summary reports $m=13$ at $\tau=0.25$, a favorable case that cannot establish
+the candidate distribution on a dataset.
+
+The equivalence argument assumes identical threshold strictness, class
+selection, NMS settings, and tie handling. Floating-point behavior near the
+threshold, multi-label validation, and NMS ordering require explicit tests.
+\missing{P3}{measure raw-output agreement and dense/sparse decoder parity,
+including low-confidence dataset validation}.

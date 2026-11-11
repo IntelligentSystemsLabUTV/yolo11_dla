@@ -1,0 +1,115 @@
+{
+  "date": "2026-09-11",
+  "title": "YOLO11-DLA: Fallback-Free Object Detection on NVIDIA DLA for Embedded Robotic Perception",
+  "build_command": "make -C tools/YOLO11-DLA_ICRA local",
+  "pdf": "main.pdf",
+  "pdf_sha256": "40770c7d6e390d3e0055f58f1af5866282f42227540909e9aa6f1e84d89ad07d",
+  "pages": 8,
+  "preservation": {
+    "equation_environments_in_main_and_sections": {
+      "count": 7,
+      "byte_identical": true
+    },
+    "align_environments_in_main_and_sections": {
+      "count": 1,
+      "byte_identical": true
+    },
+    "table_environments_in_main_and_sections": {
+      "count": 4,
+      "byte_identical": true
+    },
+    "figure_environments_in_main_and_sections": {
+      "count": 2,
+      "byte_identical": true
+    },
+    "figure_directory_files": {
+      "count": 23,
+      "all_sha256_unchanged": true
+    },
+    "source_labels_unchanged": true,
+    "all_preexisting_numeric_tokens_retained_in_manuscript": true,
+    "preamble_fonts_margins_spacing_unchanged": true,
+    "deployment_section_byte_identical": true,
+    "all_aux_label_numbers_unchanged": true
+  },
+  "figures_and_tables": {
+    "fig:boundary": {
+      "number": "1",
+      "page": "3",
+      "cited_in_prose": true
+    },
+    "fig:c2dla": {
+      "number": "2",
+      "page": "3",
+      "cited_in_prose": true
+    },
+    "fig:profile": {
+      "number": "3",
+      "page": "5",
+      "cited_in_prose": true
+    },
+    "tab:engine": {
+      "number": "I",
+      "page": "5",
+      "cited_in_prose": true
+    },
+    "fig:latency": {
+      "number": "4",
+      "page": "6",
+      "cited_in_prose": true
+    },
+    "tab:accuracy": {
+      "number": "II",
+      "page": "6",
+      "cited_in_prose": true
+    },
+    "tab:e2e": {
+      "number": "III",
+      "page": "6",
+      "cited_in_prose": true
+    },
+    "tab:energy": {
+      "number": "IV",
+      "page": "7",
+      "cited_in_prose": true
+    }
+  },
+  "bibliography": {
+    "entries": 30,
+    "cited": 30,
+    "unresolved": [],
+    "uncited": [],
+    "duplicate_keys_or_titles": [],
+    "added_exactly": [
+      "hernandez2024optimizing",
+      "archet2023energy",
+      "tayal2024multiinstance",
+      "chakraborty2025profiling"
+    ],
+    "metadata_verification": "REFERENCE_AUDIT.md: Applied ICRA reframing: four verified additions"
+  },
+  "latex_warnings": [
+    "Underfull \\hbox (badness 2564) in paragraph at lines 235--241",
+    "Underfull \\hbox (badness 2261) in paragraph at lines 2--1",
+    "Underfull \\hbox (badness 2035) in paragraph at lines 47--49"
+  ],
+  "latex_warning_assessment": "Three mild horizontal underfull warnings (badness 2564, 2261, 2035); no clipping or materially disruptive spacing in the inspected PDF. No overfull boxes or unresolved citations/references.",
+  "visual_review": {
+    "pages_inspected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "overlaps_or_clipped_content": false,
+    "orphan_headings": false,
+    "figure_table_placement": "Readable and in original numbering order; individual float contents, captions and dimensions unchanged.",
+    "repeated_text": "No accidental duplicate paragraphs or contribution paragraph."
+  },
+  "scope_review": "Existing measurements and protocols only; no new experiments, causally isolated architecture AP claim, isolation, GPU inactivity, concurrent-task benefit, hard real-time, cross-platform portability, or universal latency/energy superiority claim. Engine-versus-pipeline reversal and all stated scope limitations retained.",
+  "remaining_author_placeholder": "Existing P8 in sections/acknowledgment.tex remains for author verification of claims, references, figures and AI disclosure before submission; no assertion that author review has been completed."
+}

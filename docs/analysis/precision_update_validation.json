@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "date": "2026-09-14",
+  "scope": "Manuscript integration of archived results; no new inference or Jetson benchmark.",
+  "table_rows": 32,
+  "numeric_table_cells_checked": 104,
+  "source_hashes_verified": 8,
+  "derived_comparisons": {
+    "strict_int8_minus_fp16_AP": -2.4678991094010954,
+    "strict_engine_speedup": 6.602991607851231,
+    "strict_pipeline_speedup": 1.8523151949939043,
+    "strict_energy_reduction_percent": 7.734671044939246
+  },
+  "int8_checks": {
+    "layout_passes": 8,
+    "decoder_passes": 200,
+    "raw_failed_images_P3_P4_P5": [
+      50,
+      50,
+      50
+    ],
+    "strict_layer_precisions": {
+      "Int8": 298,
+      "Half": 1
+    }
+  },
+  "pdf_pages": 8,
+  "visual_review": {
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "result": "No clipped text, figures, or tables; all eight configurations visible in each result table."
+  },
+  "pdf_sha256": "f1d7e5820a0acb60350ee7fedc5cd157cba40dc9d3b210d0b1a2f3fc1e877b3f",
+  "manuscript_sources_sha256": {
+    "main.tex": "d879bd5d6a6be6b3e68d0372f41a4787451148ee5075d77e37f0aadc624630ec",
+    "sections/related_work.tex": "cfdf3eef0311a642a3c8d4cb8179137f737365d993ef1fc7701822fdfcc9a7bc",
+    "sections/method.tex": "b513b29126e08ceede2dfe57a5f7404e90991ab4aea09975bb776599affb23fb",
+    "sections/introduction.tex": "efba39d5ff23833b3161900554b29ae60fcd68c132558c2f8229e210882d00de",
+    "sections/deployment.tex": "fa86a3b55bb05ae72c30c5eab1c31bcaa8babadb80398c4f510d177a193f1a39",
+    "sections/evaluation.tex": "a14f80a2bf7da35e3879ca504ebd5714fffbb61ba33fbaf5cc5dbb988f6d9eae",
+    "sections/discussion.tex": "3136cf8cfb4e7c0cad201737fd8052129fb091ec2dfb5558a9f029d82f5b3564",
+    "sections/conclusion.tex": "e77e365fbe1dae45fd9556eae20c9ffda0ed4f153320b6e9b3c4ac7b9bb97156",
+    "tables/precision_accuracy.tex": "bbd711e7cb9ef81a490c858a5121258e217b3607998b3b509b9b68a8003fdc24",
+    "tables/precision_engine.tex": "6a3a8314ec0bf07babbab8c681c5d5d266cbe9da7dd002f37105df7e1be1dd3b",
+    "tables/precision_pipeline.tex": "ac97f7e4660d57a30af19b4c41cac157b2afa19d3b678994f0b2c6dac49bfb37",
+    "tables/precision_energy.tex": "30e158dc16ac41c22e33cf8773b4e89ad07f7bae3e33dbcafa8ba332e3fd821b"
+  },
+  "limitations": [
+    "Local format check does not replace submission portal validation.",
+    "Held-out AP comparison excludes 500 calibration images; full-5000 FP16 AP is reported separately.",
+    "Timing percentiles are within-test distributions, not cross-test confidence intervals.",
+    "Stock INT8 fallback accuracy degradation is reported without a causal attribution."
+  ]
+}

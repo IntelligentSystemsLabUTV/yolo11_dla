@@ -1,0 +1,19 @@
+% Shared print-safe palette and original vector-diagram styles.
+\definecolor{archInk}{HTML}{29384A}
+\definecolor{archBlue}{HTML}{DBE8F4}
+\definecolor{archBlueEdge}{HTML}{748EA8}
+\definecolor{archTeal}{HTML}{167D8D}
+\definecolor{archMint}{HTML}{DDF0ED}
+\definecolor{archGold}{HTML}{F8E9CC}
+\definecolor{archGoldEdge}{HTML}{B68C47}
+\definecolor{archGray}{HTML}{F3F5F7}
+\tikzset{
+  arch flow/.style={-{Latex[length=1.5mm,width=1.2mm]},draw=archInk,line width=.65pt,rounded corners=1.4pt,shorten >=.35pt},
+  arch block/.style={draw=archBlueEdge,fill=archBlue,rounded corners=1.6pt,line width=.55pt,align=center,inner xsep=3pt,inner ysep=2pt,font=\sffamily\fontsize{8}{9}\selectfont,text=archInk},
+  arch edit/.style={arch block,draw=archTeal,fill=archMint,line width=.9pt},
+  arch small/.style={font=\sffamily\fontsize{7}{8}\selectfont,text=archInk,align=center,inner sep=1pt},
+  arch title/.style={font=\sffamily\bfseries\fontsize{9}{10}\selectfont,text=archInk,anchor=west},
+  arch join/.style={circle,draw=archInk,fill=white,line width=.55pt,minimum size=4.1mm,inner sep=0pt,font=\sffamily\fontsize{7}{7}\selectfont,text=archInk},
+  arch junction/.style={circle,fill=archInk,draw=none,minimum size=1.1mm,inner sep=0pt},
+  arch badge/.style={circle,fill=archTeal,text=white,font=\sffamily\bfseries\fontsize{7}{7}\selectfont,minimum size=3.8mm,inner sep=0pt}
+}

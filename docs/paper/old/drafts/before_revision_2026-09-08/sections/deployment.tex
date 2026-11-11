@@ -1,0 +1,87 @@
+\section{DLA Case-Study Deployment}
+\label{sec:deployment}
+
+\subsection{Static Engine Interface}
+
+The model is fused and exported to ONNX with a fixed batch size and input
+resolution. TensorRT parses the graph in FP16 and targets DLA core~0 of the
+module; the engine exposes one image input and the three stride-ordered
+prediction bindings of Sec.~\ref{sec:retrofit}. Because the accelerator is the
+default device and fallback is disabled, the compiler either accepts the whole
+graph or refuses to build, which is the property we use as an acceptance test.
+
+\subsection{Confidence-First Sparse DFL Decode}
+
+The host decoder splits the first $4r=64$ channels from the $n_c=80$ class
+logits at each scale. Since a candidate's class confidence does not depend on
+its box distribution, the decoder first discards every anchor whose maximum
+class logit falls below the inverse-sigmoid image of the confidence threshold,
+$\log\frac{\tau}{1-\tau}$, and only then restores grids and applies the 16-bin
+expectation \eqref{eq:dfl} to the survivors, converts distances to boxes,
+applies $\sigma(\cdot)$, and runs standard NMS. Up to floating-point roundoff
+this is equivalent to dense decoding followed by the same threshold, because
+thresholding commutes with a per-anchor box transform that it does not read;
+the dense path is retained in the implementation as an equivalence gate and is
+the reference against which the sparse path is checked. The saving is large
+because the surviving fraction is small: at $\tau=0.25$ on the test image, 13 of
+$8400$ anchors survive (Sec.~\ref{sec:rq3}).
+
+\subsection{DLA-Native Input Packing and Output Unpacking}
+\label{sec:packing}
+
+The strict engine does not accept a linear NCHW image and does not return
+linear NCHW predictions, and this is the single most consequential difference
+between deploying on the accelerator and deploying on the GPU. It is built with
+\texttt{--inputIOFormats=fp16:dla\_hwc4} and
+\texttt{--outputIOFormats=fp16:chw16}, and the build-time layer dump confirms
+the input as the DLA image format, ``channel major FP16 where
+$C \bmod 4 = 0$'', and the three outputs as ``sixteen wide channel vectorized
+row major FP16''. At $640\times640$ the input is a 3-channel image padded to 4
+channels and interleaved per pixel, with each row aligned to 64 bytes, giving a
+$4\times640\times640$ FP16 buffer of $3.28$~MB; the outputs need no channel
+padding, since $144=9\times16$, and total $144\times8400$ FP16 values, i.e.\
+$2.42$~MB. \TODO{the runtime-reported binding format string for this engine is
+not recorded in our logs; the TensorRT Python API may report a
+channel-vectorized alias for the DLA image format, which changes nothing about
+the buffer geometry but should be recorded in the final runs}
+
+Where this conversion runs, and in what implementation, is a property of the
+integrator and not of the accelerator, so we state it exactly. In our reference
+pipeline both directions run \emph{on the host CPU in single-threaded PyTorch}
+(\texttt{torch.set\_num\_threads(1)}). Packing allocates a zero-filled padded
+tensor, copies a permuted NCHW-to-interleaved view into it, flattens it, and
+copies it synchronously into the device buffer; unpacking copies the device
+buffer to the host and then applies a view, a permutation, a
+\texttt{contiguous()} materialization, and a float cast per output. There is no
+CUDA kernel, no pinned staging buffer, no NEON-tuned or vectorized packer, and
+no overlap between conversion and execution. This is a deliberately simple
+reference implementation, and Sec.~\ref{sec:rq3} reports its cost as such.
+
+\subsection{Compliance Gates}
+
+We instantiate $A_{\mathcal{H}}(G)=1$ as strict DLA execution only if all of the
+following hold, in order:
+\begin{enumerate}
+  \item the model is fused before export, and every engine input and learned
+  output has a fixed four-dimensional shape;
+  \item the exported ONNX graph contains no rank-changing terminal subgraph, no
+  matrix multiplication, and no dynamic shape operator, audited on the graph
+  rather than assumed from the exporter flags;
+  \item TensorRT builds with DLA as the default device and GPU fallback
+  disabled, so that a single inadmissible node is a build failure;
+  \item the verbose build log and the engine inspector report no GPU-assigned
+  learned layer, apart from unavoidable host-side I/O handling; and
+  \item externally decoded predictions agree with the ordinary PyTorch
+  inference path within a documented tolerance, and the sparse decoder agrees
+  with the dense one.
+\end{enumerate}
+Gate~2 is an audit of the graph the compiler will see, not a whitelist claim
+about the source model: the retrofit inherits a static channel split, a channel
+softmax, and SiLU decompositions whose fusion is a compiler behavior that can
+change across toolchain versions, so gate~3 remains the binding criterion and
+gate~2 exists to explain build failures rather than to predict success. Gates 3
+and 4 are evaluated on the target module, because engines and DLA loadables are
+specific to the hardware and software stack that produced them. A
+fallback-enabled build never satisfies these gates and is reported only as a
+diagnostic. On a different accelerator, gates 1, 3, 4, and 5 carry over
+verbatim and only the operator audit of gate~2 is replaced.

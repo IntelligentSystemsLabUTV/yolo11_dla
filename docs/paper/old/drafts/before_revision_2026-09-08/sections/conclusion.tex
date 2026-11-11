@@ -1,0 +1,32 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We treated the decision to move a robot's detector onto a fixed-function
+accelerator as the object of study, and measured its price on the Jetson Orin
+module characterized in Sec.~\ref{sec:setup}. Making a current one-stage detector admissible under the NVIDIA DLA
+execution contract requires two substitutions and nothing else: a channel-softmax
+mixer in place of position-sensitive attention, and a static rank-four
+multi-scale output interface in place of the decoded head. With those, TensorRT
+compiles the whole learned graph into a single DLA loadable with no layer on the
+GPU, whereas the unmodified detector is rejected at its attention matrix
+multiplication. The price is $1.72$ points of COCO
+$\mathrm{mAP}_{50\text{--}95}$ and, at the engine boundary, $7.36\times$ the
+latency of the same detector's GPU engine. Partial offloading does not buy a
+compromise: with fallback enabled the graph fragments into four loadables, 11
+GPU kernels, and 22 reformat nodes, spends $94\%$ of its engine time on the
+accelerator, and is slower than either fully placed alternative. At the
+application boundary our reference pipeline measures $2.94\times$ the baseline's
+median latency, but only $19.6$ of the $37.3$~ms difference is the engine; the
+remainder is single-threaded layout conversion and an unexplained cross-process
+inflation of stages that never touch the accelerator, so the application-level
+figure is an upper bound on the cost, not an estimate of it.
+
+What we have therefore established is admissibility and its price, not the case
+for paying it. That case rests on energy per frame and on GPU availability under
+contention, and those measurements are specified and instrumented here but not
+yet taken. We regard this as the honest state of the question: fixed-function
+offloading of perception is achievable with a small accuracy loss and a large
+latency loss, and whether that trade is right for a given robot depends on
+quantities that the community currently reports far less often than
+$\mathrm{mAP}$ and frames per second. A constraint-native redesign of the
+detector, rather than a retrofit of an existing one, is ongoing separate work.

@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-13",
+  "pdf": "main.pdf",
+  "pdf_sha256": "c4584c0fd1b17f8573b1d630e2682739c15a386599aefaf1bb8ea84a6f955c90",
+  "pages": 8,
+  "editorial_changes": [
+    "Defined DLA, NMS, H2D, D2H, AMP at first main-text use and explained GPU (GR3D) utilization.",
+    "Corrected C2DLA coordination: not algebraically equivalent to C2PSA, nor greater representational power claimed.",
+    "Standardized engine-plus-transfer, device-execution and application-pipeline terminology.",
+    "Distinguished DLA inspector nodes from source layers and DLA loadables.",
+    "Replaced internal artifact-audit wording with experimental prose while preserving provenance.",
+    "Rounded only the three prose AP deltas as requested.",
+    "Standardized trade-off and host-side terminology."
+  ],
+  "prose_ap_rounding": {
+    "-0.00468": "approximately -0.005",
+    "-0.06935": "approximately -0.069",
+    "1.32333": "1.323"
+  },
+  "scientific_results_unchanged": true,
+  "table_values_and_equations_byte_identical": true,
+  "existing_figure_assets_byte_identical": true,
+  "bibliography_byte_identical": true,
+  "bibliography_entries_all_cited": 30,
+  "citation_numbering_unchanged": true,
+  "concurrent_workspace_changes": "A teaser figure and additional wording/caption edits appeared during this pass. Preserved those edits and teaser.pdf. Fixed its Unicode dash using LaTeX syntax, expanded NMS in its caption without duplicating the main-text acronym definition, and added the figure citation. Minor prose compression restored the eight-page limit without changing geometry or results. Figure numbering advances naturally with the added teaser.",
+  "figure_count": 5,
+  "table_count": 4,
+  "acknowledgment_or_placeholders": false,
+  "geometry_and_fonts_unchanged": true,
+  "visual_review": "All eight pages inspected; no clipping, overlaps, orphan headings, or unreadable bibliography caused by the edits.",
+  "underfull_warnings": [
+    "Underfull \\hbox (badness 1715) in paragraph at lines 227--238",
+    "Underfull \\hbox (badness 1365) in paragraph at lines 227--238",
+    "Underfull \\hbox (badness 2020) in paragraph at lines 227--238",
+    "Underfull \\hbox (badness 2564) in paragraph at lines 239--245",
+    "Underfull \\hbox (badness 2261) in paragraph at lines 2--2",
+    "Underfull \\hbox (badness 2035) in paragraph at lines 47--49"
+  ],
+  "warning_assessment": "Six mild horizontal underfull warnings, with no materially bad spacing on visual inspection; no overfull boxes, missing glyphs, or unresolved references.",
+  "scope": "Editorial revision only; no INT8 measurements or conclusions were added. Local PDF preflight passed; no external submission performed."
+}

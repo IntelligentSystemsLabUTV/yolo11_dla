@@ -1,0 +1,78 @@
+\section{Introduction}
+\label{sec:introduction}
+
+A mobile robot runs perception next to mapping, planning, control, and logging,
+usually on a single system-on-chip. Whichever processor perception occupies is
+not available to the rest of the stack while it is busy, and whatever it draws
+comes out of the same power budget. Embedded platforms therefore ship
+fixed-function neural accelerators next to the GPU: on NVIDIA Jetson Orin
+modules, up to two Deep Learning Accelerator (DLA) cores, depending on the SKU. Their appeal to a robot
+integrator is not peak throughput; it is that a detector placed on one of them
+stops competing for the GPU and, being fixed-function, is expected to convert
+each frame into less energy than a general-purpose engine does.
+
+The obstacle is that such an accelerator does not execute an arbitrary graph. It
+implements an execution contract: a set of supported operators plus constraints
+on tensor rank, layout, static shapes, precision, kernel parameters, and
+dataflow. Regions that violate the contract either fail compilation or, if the
+toolchain permits fallback, migrate to the shared processor, which reintroduces
+exactly the contention the offload was meant to remove. Hardware support is
+consequently not an exporter setting but a property of the model graph.
+
+This paper studies the resulting decision as a systems question with a
+measurable price. We take a strong reference detector, YOLO11n
+\cite{jocher2024yolo11}, make it admissible with the smallest substitution we
+could find that removes every contract violation, and then quantify what the
+move to a fixed-function accelerator costs at the engine boundary, at the
+application boundary, and in accuracy, so that the energy and availability
+benefit can be weighed against a known price rather than assumed. The retrofit,
+\emph{YOLO11-DLA-n}, keeps the YOLO11 stem, all C3k2 stages, SPPF, the complete
+path-aggregation neck, the head towers, the losses, and the assignment rule, and
+replaces two things only: the position-sensitive attention block, whose matrix
+multiplications the contract forbids, and the decoded output interface, whose
+rank-three anchor decode drags otherwise admissible producers off the
+accelerator.
+
+Stating the price plainly is the point of the paper, so we state it here. On the
+target module, the strict DLA engine of the retrofit runs at $27.515$~ms median
+engine-plus-transfer latency at batch one and $640\times640$, against $3.740$~ms
+for the unmodified detector's GPU engine: fixed-function placement is
+$7.36\times$ slower at the engine boundary, not faster. The substitution also
+costs $1.72$ points of COCO $\mathrm{mAP}_{50\text{--}95}$. Neither number is a
+result to be optimized away in this paper; together they are the price of
+admission, and our claim is that in a power-capped robot whose GPU is
+oversubscribed the price can be repaid in energy per frame and in restored GPU
+availability.
+
+Two intermediate positions deserve to be closed off early. The first is partial
+offloading. TensorRT can place what it can on DLA and run the rest on the GPU;
+for the unmodified detector this produces four DLA loadables, eleven GPU compute
+kernels, and 22 reformat nodes, spends $94.0\%$ of engine time on DLA, and is
+still slower than the fully placed retrofit and far slower than the GPU engine.
+Fallback builds are useful as diagnostics and useless as deployments, so we
+report the fallback build only in that role. The second is the temptation to
+present accuracy retention as the contribution. Retaining $95.6\%$ of the
+reference $\mathrm{mAP}_{50\text{--}95}$ is what makes the offload
+\emph{admissible as a perception module at all}; it is a precondition, not a
+finding, and we treat it as such.
+
+The contributions are:
+\begin{itemize}
+  \item a formulation of fixed-function perception offloading as an
+  admissibility problem over a declared hardware execution contract, with the
+  learned graph separated from variable-cardinality task logic at an explicit
+  accelerator boundary;
+  \item a minimal admissible retrofit of a current one-stage detector under the
+  NVIDIA DLA contract, with a weight-aware initialization that transfers the
+  reference model's projections into the substituted block;
+  \item a measured price of admission on the target module: strict-build
+  acceptance, engine-boundary latency and throughput, accuracy retention, and a
+  stage-resolved application-level accounting that separates the accelerator's
+  cost from the reference implementation's cost; and
+  \item evidence that partial offloading does not provide a compromise, plus the
+  protocol and instrumentation for the energy and GPU-isolation measurements on
+  which the decision ultimately rests.
+\end{itemize}
+
+Hereafter DLA denotes NVIDIA's accelerator, not the homonymous Deep Layer
+Aggregation architecture.

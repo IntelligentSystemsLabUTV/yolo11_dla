@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-11",
+  "revision": "Final editorial microfix pass",
+  "pdf": "main.pdf",
+  "pdf_sha256": "535574a58dc76d532985244bd1af43f28d909dfab3e15e593b0ed76686a547fe",
+  "pages": 8,
+  "changes": [
+    "Replaced Hernandez et al. description with the requested conservative wording.",
+    "Deleted sections/acknowledgment.tex and its main.tex inclusion.",
+    "Removed the unused editorial-placeholder macro and comment."
+  ],
+  "title_framing_unchanged": true,
+  "introduction_method_deployment_evaluation_discussion_conclusion_byte_identical": true,
+  "figure_files_byte_identical": true,
+  "tables_equations_protocols_results_limitations_byte_identical": true,
+  "ieee_template_geometry_fonts_spacing_unchanged": true,
+  "bibliography": {
+    "entries": 30,
+    "all_cited": true,
+    "undefined_keys": [],
+    "duplicate_keys_or_titles": [],
+    "file_byte_identical": true,
+    "citation_numbering_unchanged": true
+  },
+  "all_equation_figure_table_label_numbers_unchanged": true,
+  "acknowledgment_assistance_text_and_placeholders_absent_from_sources_and_pdf": true,
+  "visual_inspection": {
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "clipping_overlaps_or_orphan_headings": false,
+    "figures_tables": "Preserved, readable, and in original order.",
+    "bibliography": "Uses recovered acknowledgment space naturally; no geometry or balancing changes."
+  },
+  "warnings": [
+    "Underfull \\hbox (badness 2564) in paragraph at lines 235--241",
+    "Underfull \\hbox (badness 2261) in paragraph at lines 2--2",
+    "Underfull \\hbox (badness 2035) in paragraph at lines 47--49"
+  ],
+  "warning_assessment": "Three mild underfull hbox warnings; no materially bad spacing on visual inspection. No overfull boxes, undefined references, or undefined citations.",
+  "claim_audit": "All existing scope qualifications preserved. No claims of GPU inactivity/isolation, concurrent-task or robot-level benefits, deterministic scheduling, hard real-time guarantees, cross-platform portability, architecture-only AP causality, or general latency/energy superiority introduced.",
+  "validation_scope": "Local compilation, source preservation, citation and visual PDF checks; no submission or external portal validation performed."
+}

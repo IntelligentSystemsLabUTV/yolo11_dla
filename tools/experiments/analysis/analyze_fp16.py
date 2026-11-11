@@ -9,7 +9,7 @@ from __future__ import annotations
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
-from _paths import WORKSPACE, PAPER
+from _paths import ARTIFACTS, WORKSPACE, PAPER
 
 
 import argparse
@@ -28,9 +28,9 @@ import numpy as np
 
 
 CONFIGS = [
-    ("yolo11n-gpu-fp16", "YOLO11n", "GPU", "yolo11n.onnx"),
+    ("yolo11n-gpu-fp16", "YOLO11-n", "GPU", "yolo11n.onnx"),
     ("yolo11n-dla-gpu-fp16", "YOLO11-DLA-n", "GPU", "yolo11n-dla.onnx"),
-    ("yolo11n-dla-gpu-fallback-fp16", "YOLO11n", "DLA+GPU fallback", "yolo11n.onnx"),
+    ("yolo11n-dla-gpu-fallback-fp16", "YOLO11-n", "DLA+GPU fallback", "yolo11n.onnx"),
     ("yolo11n-dla-strict-dla-fp16", "YOLO11-DLA-n", "strict DLA", "yolo11n-dla.onnx"),
 ]
 NONCOMPUTE = {"NoOp", "Constant", "shape_call"}
@@ -188,7 +188,7 @@ def latency_figure(runs, directory):
                 ax.text(v + xmax * .02, y, f"{v:.2f}", va="center", fontsize=6.8)
             if panel == 0:
                 handles.append(bars)
-        ax.set_yticks([0, 1], ["YOLO11n" + ("\nfallback" if panel else ""), "YOLO11-DLA-n" + ("\nstrict" if panel else "")])
+        ax.set_yticks([0, 1], ["YOLO11-n" + ("\nfallback" if panel else ""), "YOLO11-DLA-n" + ("\nstrict" if panel else "")])
         ax.set_ylim(1.48, -.48)
         ax.set_xlim(0, xmax)
         ax.set_xticks(ticks)
@@ -200,42 +200,29 @@ def latency_figure(runs, directory):
 
 
 def profile_figure(runs, directory):
+    # Match the device semantics and pastel fills/edges of the vector teaser (Fig. 1).
+    palette = {"DLA": ("#CBEBC7", "#7EB07B"),
+               "Reformat": ("#E9DCFD", "#BEA9DD"),
+               "GPU compute": ("#BBDCFE", "#74A2D7")}
     fallback, strict = runs[2:]
-    fig, axes = plt.subplots(2, 1, figsize=(3.46, 3.0), gridspec_kw={"height_ratios": [1, 1.1]})
-    fig.subplots_adjust(left=.265, right=.97, top=.84, bottom=.15, hspace=.95)
-    ax = axes[0]
+    fig, ax = plt.subplots(figsize=(3.46, 1.35))
+    fig.subplots_adjust(left=.265, right=.97, top=.72, bottom=.28)
     left = np.zeros(2)
     for kind in ["DLA", "Reformat", "GPU compute"]:
         vals = np.array([r["profile"]["aggregates"][kind]["average_ms"] for r in [fallback, strict]])
-        ax.barh([0, 1], vals, left=left, color=COLORS[kind], height=.48, label=kind)
+        color, edge = palette[kind]
+        ax.barh([0, 1], vals, left=left, color=color, edgecolor=edge, linewidth=.6, height=.48, label=kind)
         left += vals
     for y, r in enumerate([fallback, strict]):
         ax.text(r["profile"]["average_ms_sum"] + .65, y, f'{r["profile"]["average_ms_sum"]:.2f}', va="center", fontsize=7)
-        ax.text(r["profile"]["aggregates"]["DLA"]["average_ms"] / 2, y, f'{r["profile"]["aggregates"]["DLA"]["percentage"]:.1f}% DLA', color="white", ha="center", va="center", fontsize=7)
-    ax.set_yticks([0, 1], ["YOLO11n\nfallback", "YOLO11-DLA-n\nstrict"])
+        ax.text(r["profile"]["aggregates"]["DLA"]["average_ms"] / 2, y, f'{r["profile"]["aggregates"]["DLA"]["percentage"]:.1f}% DLA', color="black", ha="center", va="center", fontsize=7)
+    ax.set_yticks([0, 1], ["YOLO11-n\nfallback", "YOLO11-DLA-n\nstrict"])
     ax.set_ylim(1.55, -.55)
     ax.set_xlim(0, 40)
     ax.set_xticks([0, 10, 20, 30, 40])
     ax.set_xlabel("Summed profiler means (ms)", labelpad=2)
-    ax.set_title("(a) Separately profiled engine", loc="left", pad=7)
     clean_axis(ax)
     fig.legend(*ax.get_legend_handles_labels(), loc="upper center", bbox_to_anchor=(.54, 1), frameon=False, ncol=3, columnspacing=.7, handlelength=1.05, handletextpad=.4)
-    ax = axes[1]
-    kinds = ["DLA", "Reformat", "GPU compute"]
-    x = np.arange(3)
-    for offset, r, color, hatch in [(-.16, fallback, "#7E8D9F", ""), (.16, strict, "#007F75", "")]:
-        vals = [r["layer_category_counts"].get(k, 0) for k in kinds]
-        ax.bar(x + offset, vals, width=.28, color=color, hatch=hatch)
-        for xx, v in zip(x + offset, vals):
-            ax.text(xx, v + .6, str(v), ha="center", va="bottom", fontsize=7)
-    ax.set_xticks(x, ["DLA\nloadables", "Reformat\nnodes", "GPU compute\nnodes"])
-    ax.set_ylim(0, 27)
-    ax.set_yticks([0, 10, 20])
-    ax.set_ylabel("Count", labelpad=2)
-    ax.set_title("(b) Optimized engine inspection", loc="left", pad=6)
-    ax.set_axisbelow(True)
-    ax.grid(axis="y", color="#E4E8EB", linewidth=.5)
-    ax.text(.99, .91, "gray: fallback   teal: strict", transform=ax.transAxes, fontsize=6.3, ha="right")
     save_figure(fig, directory, "fallback_profile")
 
 
@@ -267,7 +254,7 @@ def training_figure(path, directory):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--logs", type=Path, default=WORKSPACE / "logs/fp16_matrix")
-    parser.add_argument("--output", type=Path, default=PAPER / "analysis")
+    parser.add_argument("--output", type=Path, default=ARTIFACTS)
     parser.add_argument("--figures", type=Path, default=PAPER / "figures")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -291,7 +278,7 @@ def main():
         "clock_caveat": "The logs explicitly state application clock rates do not reflect actual running rates.",
     }
     audit = {
-        "scope": "YOLO11n baseline and YOLO11-DLA-n only; custom YOLO-DLA excluded",
+        "scope": "YOLO11-n baseline and YOLO11-DLA-n only; custom YOLO-DLA excluded",
         "benchmark_date": datetime.strptime(required(r"\[(\d{2}/\d{2}/\d{4})-", reference_log).group(1), "%m/%d/%Y").date().isoformat(),
         "hardware_recorded": hardware,
         "hardware_missing": ["exact module SKU and carrier", "JetPack/L4T", "CUDA/cuDNN versions", "nvpmodel power mode", "jetson_clocks policy", "measured CPU/GPU/DLA/EMC clocks", "thermal and ambient state", "power/energy measurements"],

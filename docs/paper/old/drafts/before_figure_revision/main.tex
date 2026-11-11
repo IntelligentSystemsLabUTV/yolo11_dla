@@ -1,0 +1,53 @@
+\documentclass[letterpaper,10pt,conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+\usepackage{amsmath,amssymb,booktabs,cite}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx,graphicx,microtype,url}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,fit,positioning}
+% Explicit evidence placeholders; IDs map to FINAL_TESTS.md.
+\newcommand{\missing}[2]{\textcolor{BrickRed}{\textbf{[#1: #2]}}}
+\newcommand{\model}{YOLO11-DLA-n}
+\title{\LARGE\bf YOLO11-DLA: Adapting YOLO11 for Fallback-Free\\
+Object Detection on the NVIDIA Deep Learning Accelerator}
+\author{Anonymous Authors}
+\begin{document}
+\special{pdf:minorversion 4}
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+\begin{abstract}
+Embedded robots increasingly share a GPU between perception and other workloads,
+but exporting a detector to a dedicated accelerator does not guarantee that its
+learned computation leaves the GPU. We present YOLO11-DLA, an adaptation of
+YOLO11 that targets fallback-free inference on NVIDIA's Deep Learning
+Accelerator (DLA). Two localized changes retain the detector's backbone and
+neck structure: a channel-softmax and depthwise-convolution block replaces
+spatial self-attention, and a static multi-scale prediction interface places
+box decoding and non-maximum suppression outside the compiled graph. On a
+Jetson Orin with TensorRT 10.3, the nano model compiles into one DLA loadable
+with no GPU-assigned learned layer; unmodified YOLO11n fails strict
+compilation. At FP16, batch one, and $640\times640$, median
+engine-plus-transfer latency is 27.515\,ms, compared with 34.678\,ms for
+unmodified YOLO11n using DLA with GPU fallback, a 20.7\% reduction.
+The adapted model remains substantially slower than its own GPU engine
+(3.500\,ms). Its retained 500-epoch training record reports 37.581 COCO
+AP, while serialized-engine accuracy remains
+\missing{P3}{to be measured}. We distinguish compiler placement, engine
+timing, and application timing, and identify the remaining accuracy,
+concurrent-workload, and energy tests required to assess this design as a
+robotic perception component.
+\end{abstract}
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/deployment}
+\input{sections/evaluation}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{sections/acknowledgment}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

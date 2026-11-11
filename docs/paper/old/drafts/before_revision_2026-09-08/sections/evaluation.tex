@@ -1,0 +1,372 @@
+\section{Evaluation}
+\label{sec:eval}
+
+Four research questions organize the evaluation. \textbf{RQ1}: what does making
+the graph admissible cost in task accuracy? \textbf{RQ2}: is the retrofit
+actually admissible under fallback-free compilation, and what is the latency and
+throughput price at the engine boundary? \textbf{RQ3}: how does that price
+appear at the application boundary once preprocessing, layout conversion, and
+host decoding are accounted for? \textbf{RQ4}: what does strict placement return
+in energy per frame and in GPU availability under contention? RQ1--RQ3 are
+answered with measurements; RQ4 is specified, instrumented, and not yet
+measured, and we mark it as such rather than argue it.
+
+We test one hypothesis, H1: a substitution restricted to the inadmissible
+regions of a strong detector, initialized from that detector's weights, retains
+most of its accuracy, so that admissibility can be bought at a task cost small
+enough to be irrelevant to the deployment decision. The deployment decision
+itself is then determined by RQ2--RQ4 and not by H1.
+
+\subsection{Setup}
+\label{sec:setup}
+
+\paragraph*{Platform}
+All device measurements come from one NVIDIA Jetson Orin module. The build logs
+record device name \texttt{Orin}, compute capability $8.7$, 16 streaming
+multiprocessors, $62\,840$~MiB of shared device memory, a 256-bit memory bus, an
+application compute clock of $1.3$~GHz, TensorRT $10.3.0$, and DLA core~0 with
+DLA memory pools of 1~MiB managed SRAM, 1024~MiB local DRAM, and 512~MiB global
+DRAM. \TODO{exact module SKU and carrier, JetPack/L4T version, CUDA and cuDNN
+versions, active \texttt{nvpmodel} power mode, \texttt{jetson\_clocks} state,
+measured GPU/DLA/EMC clocks during each run, and thermal state; none of these
+are in the current logs and all must be recorded with the final runs}
+
+\paragraph*{Models and accuracy protocol}
+The reference is the official COCO-pretrained YOLO11n checkpoint; the retrofit
+is its best validation checkpoint \TODO{exact training schedule of the reported
+retrofit checkpoint: epoch budget of each phase and the frozen-adaptation
+length; the checkpoint file name in our records suggests a different epoch
+count than the one we had noted}. Both are evaluated on the same COCO val2017
+split \cite{lin2014coco} at $640\times640$ over the same 80 classes. Precision
+and recall are averaged over classes at the confidence operating point that
+maximizes mean F1. Reference retention is $100\,Q(G)/Q(G_0)$ with
+$Q=\mathrm{mAP}_{50\text{--}95}$.
+
+\paragraph*{Deployment protocol}
+Three builds are used: TensorRT GPU FP16 as the primary baseline, TensorRT with
+DLA requested and GPU fallback enabled as a partitioning diagnostic, and strict
+DLA FP16 with fallback disabled. All comparisons are at FP16, batch one, and
+$640\times640$. Engine-boundary numbers come from \texttt{trtexec} with
+generated inputs, a 2~s warm-up, a 30~s run, one inference stream, spin waiting,
+and H2D and D2H transfers included; TensorRT's reported host latency is the sum
+of H2D, device execution, and D2H, and excludes preprocessing and detector
+post-processing, so we call it engine-plus-transfer latency and never
+end-to-end latency. Application-level numbers come from one instrumented tester
+that letterboxes a $960\times1280$ image to $640\times640$ and runs 100 timed
+iterations after ten full-pipeline warm-ups, with single-threaded CPU
+post-processing, $\tau=0.25$, and NMS IoU $0.45$; file reading, annotation, and
+image writing are excluded.
+
+\subsection{RQ1: Accuracy and Retention (the Price of Admission)}
+\label{sec:rq1}
+
+Table~\ref{tab:accuracy} reports the model-level comparison. The retrofit
+reaches $37.68\%$ $\mathrm{mAP}_{50\text{--}95}$ against $39.40\%$ for the
+reference, i.e.\ it gives up $1.72$ points and retains $95.6\%$; precision,
+recall, and $\mathrm{mAP}_{50}$ fall by $0.94$, $1.22$, and $1.97$ points. This
+supports H1 and closes RQ1: the accuracy cost of removing two inadmissible
+subgraphs from a modern detector is under two points of
+$\mathrm{mAP}_{50\text{--}95}$, which for most robot deployments is not the
+term that decides where the model runs. We deliberately do not present this as
+the result of the paper. It is the precondition that makes the rest of the
+comparison meaningful, and it is measured on the PyTorch path, not through the
+serialized accelerator engine.
+
+\begin{table}[t]
+\caption{COCO val2017 detection accuracy at $640\times640$, percent. The first
+four columns are measured on the ordinary PyTorch inference path. The last
+column, which is what the deployed strict engine actually delivers, is not yet
+measured.}
+\label{tab:accuracy}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{lccccc}
+\toprule
+ & \multicolumn{4}{c}{PyTorch path} & Strict DLA engine \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-6}
+Model & P & R & $\mathrm{mAP}_{50}$ & $\mathrm{mAP}_{50\text{--}95}$
+      & $\mathrm{mAP}_{50\text{--}95}$ \\
+\midrule
+YOLO11n      & 65.64 & 50.25 & 55.14 & 39.40 & n/a (build rejected) \\
+YOLO11-DLA-n & 64.70 & 49.03 & 53.17 & 37.68 & \TODO{measure} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The empty cell in Table~\ref{tab:accuracy} is a real gap, not a formality.
+\TODO{COCO $\mathrm{mAP}_{50\text{--}95}$ evaluated from the serialized strict
+DLA engine. The stock Ultralytics TensorRT backend cannot bind CHW16 outputs or
+a DLA image input, so this requires running the validator through the custom
+tester path of Sec.~\ref{sec:packing}; FP16 rounding, the compiler's DLA
+softmax approximation, and the packing path can all move the number} Until it is
+filled, every accuracy statement in this paper describes the PyTorch model and
+not the engine.
+
+\subsection{RQ2: Admissibility and the Engine Boundary}
+\label{sec:rq2}
+
+\paragraph*{Admissibility}
+The unmodified detector is rejected. With DLA as the default device and fallback
+disabled, the build aborts at \texttt{/model.10/m/m.0/attn/MatMul} with
+\emph{``MatMul is unsupported on DLA''} followed by a DLA validation failure, so
+no engine exists to measure. The retrofit is accepted: the verbose build reports
+299 layers running on DLA and \emph{``No layer is running on GPU''}, and the
+engine inspector represents the whole learned graph as a single \texttt{DLA}
+layer with the three declared prediction bindings. Compliance gates 1--4 of
+Sec.~\ref{sec:deployment} are therefore satisfied; gate~5 is satisfied at the
+level of the interface check reported in Sec.~\ref{sec:rq3} and not yet at the
+level of dataset accuracy.
+
+\paragraph*{Why partial offloading is not an option}
+The fallback build is the natural compromise a practitioner would try, and it
+does not work. TensorRT keeps 317 layers on DLA and moves 17 to the GPU: the two
+attention matrix multiplications, eight reshape/transpose shuffles, two slices,
+one division, and four constants. The reasons the log gives for the head are
+instructive, because they are shape reasons rather than operator reasons:
+\emph{``Input tensor has less than 4 dimensions''} and \emph{``Dimension: 3
+(8400) exceeds maximum allowed size for DLA: 8192''}. The decoded interface is
+inadmissible twice over, once for rank and once for extent, which is what
+motivates the boundary of Sec.~\ref{sec:boundary}.
+
+After fusion the resulting engine contains 47 nodes: four DLA loadables, 11 GPU
+compute kernels, 22 reformat nodes, seven no-ops, and three constants. The layer
+profiler attributes $93.97\%$ of execution time to the four DLA loadables,
+$4.73\%$ to the reformat nodes, and $1.31\%$ to all GPU compute together; the
+largest single DLA segment, which ends at the attention transpose, accounts for
+$42.54\%$ ($14.581$~ms). So the GPU does almost no arithmetic in this build, and
+the build is still the slowest of the three at $34.678$~ms median. Coverage
+statistics are the wrong metric for a partitioned graph: what costs time is the
+partitioning itself, in layout conversion and in serialization of four
+loadables. A build that is $94\%$ on the accelerator still holds the GPU, still
+pays $22.80$~MiB of execution-context device memory, and its median
+engine-plus-transfer latency is $26.0\%$ above that of the fully placed strict
+engine. We report it as a diagnostic and not as a
+deployment option.
+
+\paragraph*{The price at the engine boundary}
+Table~\ref{tab:engine} gives the matrix. The comparison that matters is the
+strict engine against the primary baseline, the reference detector on the GPU:
+$27.515$~ms against $3.740$~ms median engine-plus-transfer latency, a factor of
+$7.36$, and $37.2$ against $288.3$ queries/s saturated throughput, i.e.\
+$12.9\%$. Against the retrofit's own GPU engine the factor is $7.86$. Transfers
+are not the reason: for the strict engine the median splits into $0.393$~ms
+H2D, $26.816$~ms device execution, and $0.305$~ms D2H, so $97.5\%$ of the
+engine-boundary time is the accelerator computing. This is what a
+fixed-function core costs on this workload, and no boundary placement or
+implementation effort inside the engine will remove it.
+
+Two secondary observations. First, the retrofit is not slower than the reference
+on the GPU: $3.500$ against $3.740$~ms median and $317.2$ against
+$288.3$~queries/s, which is an interface difference rather than an architecture
+win, since the retrofit's engine stops before the decode that the reference
+performs internally. Second, the strict engine is the cheapest to build and to
+hold: $18.7$~s build time against $471.7$~s for the reference GPU engine,
+$6.52$~MiB serialized against $8.15$~MiB, and zero execution-context device
+memory against $9.47$~MiB, because its activations live in the accelerator's own
+memory pools. Those allocator figures support the placement audit; they are not
+a substitute for the concurrency measurement of Sec.~\ref{sec:rq4}.
+
+\begin{table}[t]
+\caption{FP16 TensorRT engine boundary, batch one, $640\times640$, DLA core~0.
+Latency includes H2D, device execution, and D2H, and excludes pre- and
+post-processing. DLA share is profiler time, not layer count. Each row is one
+30~s \texttt{trtexec} launch.}
+\label{tab:engine}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.0pt}
+\begin{tabular}{lccrrr}
+\toprule
+Model / execution & Build & DLA & Median & P95 & Thr. \\
+                  &       & (\%) & (ms)  & (ms) & (q/s) \\
+\midrule
+YOLO11n / GPU (baseline)   & yes & 0    & 3.740  & 3.753  & 288.3 \\
+YOLO11n / DLA+GPU (diagn.) & yes & 94.0 & 34.678 & 34.942 & 29.2 \\
+YOLO11n / strict DLA       & \textbf{no} & --- & --- & --- & --- \\
+YOLO11-DLA-n / GPU         & yes & 0    & 3.500  & 3.512  & 317.2 \\
+YOLO11-DLA-n / strict DLA  & yes & 100  & 27.515 & 27.718 & 37.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{RQ3: Application-Level Accounting}
+\label{sec:rq3}
+
+\input{figures/latency_stack}
+
+Table~\ref{tab:e2e} and Fig.~\ref{fig:stack} decompose one instrumented
+pipeline over the four configurations that have data. The strict path measures
+$56.497$~ms median total against $19.203$~ms for the baseline, a factor of
+$2.94$; the sequential image rates are $17.70$ and $52.08$~images/s, which are
+inverse median latencies and not saturated throughput. Decomposing the
+$37.29$~ms difference by stage is more informative than the ratio: the engine
+contributes $+19.64$~ms, layout conversion $+11.15$~ms, preprocessing
+$+4.05$~ms, and host decoding $+2.46$~ms.
+
+Only the first of those four terms is intrinsic to the accelerator. The second
+is the reference implementation's cost, and we state its nature plainly:
+packing the DLA image input and unpacking the three CHW16 outputs together take
+$13.992$~ms ($7.755$~ms in, $6.237$~ms out) against $2.843$~ms for the
+baseline's linear bindings, for buffers of $3.28$ and $2.42$~MB respectively.
+That is an effective conversion rate of roughly $0.42$ and $0.39$~GB/s, far
+below the module's memory bandwidth, which is unsurprising for
+single-threaded PyTorch tensor permutations on the CPU as described in
+Sec.~\ref{sec:packing}. Table~\ref{tab:e2e} is therefore a characterization of
+\emph{this reference implementation}, not a measurement of the intrinsic cost of
+the DLA path, and the comparison it supports is bounded pending an optimized
+converter. \TODO{stage row for an optimized I/O path: a CUDA or NEON packer, a
+pinned staging buffer, conversion overlapped with execution, and a decoder that
+consumes CHW16 directly; this row is the honest upper bound on how much of the
+$11.15$~ms is removable}
+
+The third and fourth terms are not explained by any code path. Preprocessing is
+identical OpenCV letterboxing of the identical image in every row, yet it
+measures $4.900$ and $4.572$~ms in the two GPU rows and $8.617$ and $8.946$~ms
+in the two DLA rows. Host post-processing is likewise the same single-threaded
+code on the same 13 surviving anchors for both retrofit rows, yet it measures
+$3.717$~ms with the GPU engine and $5.711$~ms with the strict engine. The two
+DLA-row processes are thus about $6.4$~ms slower on stages that never touch the
+accelerator. We report this as an unexplained cross-process measurement
+difference between process launches and decline to attribute it to thermal,
+clock, or scheduling effects, none of which we recorded. It bounds the precision
+of the totals in Table~\ref{tab:e2e} and is a first-order reason to repeat the
+experiment as specified in Sec.~\ref{sec:validity}.
+
+Two further results belong here. The interface check passes: the retrofit's GPU
+and strict-DLA executions return the same two detections with the same
+confidences (\texttt{person} $0.871$, \texttt{bench} $0.317$) and box
+coordinates differing by at most $0.3$~pixels, which validates the packing and
+unpacking path for this input without substituting for engine-level dataset
+validation. And the confidence-first decoder of Sec.~\ref{sec:deployment} is
+what keeps host decoding affordable: it reduces median post-processing from
+$17.011$ to $3.717$~ms on the GPU engine and from $26.744$ to $5.711$~ms on the
+strict engine, while returning the same detections. Without it, the host decode
+alone would exceed the entire baseline pipeline.
+
+\begin{table}[t]
+\caption{Repeated-image pipeline check, one process launch per row, medians in
+milliseconds; I/O sums input packing/H2D and D2H/unpacking; P95 and P99 refer to
+the total. \emph{This is a characterization of the reference implementation}:
+pre-, post-processing and layout conversion are single-threaded CPU code that
+has not been optimized.}
+\label{tab:e2e}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{1.6pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Execution & Pre & I/O & Eng. & Post & Total & P95 & P99 \\
+\midrule
+11n / GPU        & 4.900 & 2.843  & 8.153  & 3.250 & \textbf{19.203} & 19.574 & 19.880 \\
+11n / DLA+GPU    & 8.617 & 4.002  & 35.198 & 4.866 & \textbf{52.782} & 53.098 & 53.396 \\
+11-DLA-n / GPU   & 4.572 & 3.848  & 7.560  & 3.717 & \textbf{19.831} & 20.343 & 20.544 \\
+11-DLA-n / DLA   & 8.946 & 13.992 & 27.788 & 5.711 & \textbf{56.497} & 56.864 & 57.781 \\
+\addlinespace
+\multicolumn{8}{l}{\emph{optimized I/O bound, same engine:}} \\
+11-DLA-n / DLA   & \multicolumn{7}{l}{\TODO{optimized packer}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{RQ4: Energy and GPU Isolation}
+\label{sec:rq4}
+
+\input{figures/isolation}
+
+RQ1--RQ3 establish the price: $1.72$ points of $\mathrm{mAP}_{50\text{--}95}$,
+$7.36\times$ engine-boundary latency, and, in the current reference pipeline,
+$2.94\times$ application latency. The paper's claim is that this price is
+repaid in two currencies that matter on a power-capped robot with an
+oversubscribed GPU, and this subsection is where that claim is tested. It is
+not yet tested. We give the protocol, the instrumentation, and the table
+skeleton, and mark every cell that requires data.
+
+\paragraph*{Energy per frame}
+Board power is logged after thermal stabilization in a fixed power mode, at
+batch one, on the ordered image set, with the pipeline saturated and with it
+running at a fixed frame rate; both total board energy per frame and
+idle-subtracted energy per frame are retained, since the idle draw of the rest
+of the module is not attributable to perception. The comparison of interest is
+the strict engine against the GPU baseline at equal delivered frame rate, not at
+equal utilization, because a robot's camera rate is fixed and the question is
+what each placement costs per frame at that rate. Table~\ref{tab:energy} is the
+intended form.
+
+\begin{table}[t]
+\caption{Energy accounting. Every cell requires the board-power measurement
+described in Sec.~\ref{sec:rq4}; no energy data has been collected.}
+\label{tab:energy}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{llccc}
+\toprule
+Power mode & Execution & Mean board & $E$/frame & $E$/frame \\
+           &           & power (W)  & (mJ)      & idle-sub. (mJ) \\
+\midrule
+\TODO{mode A} & 11n / GPU       & \TODO{} & \TODO{} & \TODO{} \\
+              & 11n / DLA+GPU   & \TODO{} & \TODO{} & \TODO{} \\
+              & 11-DLA-n / DLA  & \TODO{} & \TODO{} & \TODO{} \\
+\addlinespace
+\TODO{mode B} & 11n / GPU       & \TODO{} & \TODO{} & \TODO{} \\
+              & 11n / DLA+GPU   & \TODO{} & \TODO{} & \TODO{} \\
+              & 11-DLA-n / DLA  & \TODO{} & \TODO{} & \TODO{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph*{GPU availability under contention}
+Isolation is measured at two levels. First, a controlled CUDA workload runs
+concurrently with perception, and its standalone latency distribution is
+compared against its distribution beside the GPU baseline, beside the fallback
+build, and beside the strict engine; this isolates contention and is what
+Fig.~\ref{fig:isolation} will report. The strict engine is the only
+configuration that should leave the concurrent workload undisturbed, and the
+fallback build is the interesting control, since it occupies the GPU for only
+$1.31\%$ of its engine time yet holds a stream, reformat kernels, and
+$22.80$~MiB of context memory throughout. Second, the same engines are placed in
+a ROS~2 perception node replaying a timestamped camera sequence at its
+acquisition rate beside a fixed GPU-accelerated robotics workload
+\cite{macenski2022ros2}; we report perception deadline misses, callback jitter,
+and the slowdown of the concurrent node. The controlled test supports causal
+attribution and the replay tests whether the difference is operationally
+meaningful.
+\TODO{all RQ4 results: concurrent-workload latency distributions, perception
+deadline misses and jitter, and the slowdown of the co-running node, in each of
+the three placements}
+
+\subsection{Ablations and Validity}
+\label{sec:validity}
+
+\paragraph*{Ablations}
+Two ablations explain the accuracy result of Sec.~\ref{sec:rq1} and one explains
+the deployment result. \TODO{(i) the retrofit before and after the second
+training phase, isolating how much of the retained accuracy comes from
+weight-aware initialization versus fine-tuning; (ii) transferred versus random
+initialization of the substituted block under an identical schedule; (iii) host
+decoding on CPU versus GPU for the strict engine, which is the one configuration
+where using the GPU for decoding partly defeats the purpose of the offload and
+must therefore be quantified rather than assumed} An ablation that reintroduces
+an inadmissible operator would be an accuracy control only and would not be
+labeled accelerator-compatible.
+
+\paragraph*{Threats to validity}
+Every number in Table~\ref{tab:engine} comes from a single 30~s
+\texttt{trtexec} launch with generated input buffers, and every number in
+Table~\ref{tab:e2e} comes from one repeated image in one process launch;
+neither samples content-dependent candidate counts, run-to-run variation, or
+independent process launches, and the $6.4$~ms cross-process anomaly of
+Sec.~\ref{sec:rq3} shows that the latter matters. Final timing estimates must
+aggregate independent launches over an ordered image set with recorded power
+mode, clocks, and thermal state. Accuracy is measured on the PyTorch path, so
+Table~\ref{tab:accuracy} does not describe the deployed engine. Strict
+compilation establishes \emph{placement}, not numerical equivalence: TensorRT
+warns that its DLA softmax optimization is enabled for our channel softmax
+because the volume of the non-axis dimensions exceeds one and that this may
+introduce a small error in the output, so agreement must be measured on the
+serialized engine rather than inferred from the build. The remaining
+limitations are fixed input shapes, host-side post-processing, dependence on one
+TensorRT version and one module, and a single detector scale; the formulation of
+Sec.~\ref{sec:contract} is contract-agnostic but all evidence here comes from
+one execution contract.

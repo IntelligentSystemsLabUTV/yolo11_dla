@@ -1,0 +1,141 @@
+{
+  "archived": [
+    {
+      "from": "figures/boundary.tikz",
+      "to": "old/figures/boundary.tikz",
+      "sha256": "7f42c83f08d361ffe455fbfeaeb695d9d882d3f040b8a105abf93d069da1533f"
+    },
+    {
+      "from": "figures/teaser.tikz",
+      "to": "old/figures/teaser.tikz",
+      "sha256": "d188328daa2f4ca628f9721c00fe59cc96206b03c5a7ee8c2e01b2ff82dbce1d"
+    },
+    {
+      "from": "figures/teaser-comparison.png",
+      "to": "old/figures/teaser-comparison.png",
+      "sha256": "c94bf35bbdecf4a030c93c832b0a559c9f0d139d4aaf803df139a21fb527c495"
+    },
+    {
+      "from": "figures/teaser.png",
+      "to": "old/figures/teaser.png",
+      "sha256": "d8936b6c1ff8666121d4f9c0011eab95bf6df38655b3e57bb583d27ea38c65e8"
+    },
+    {
+      "from": "figures/c2dla_detail.log",
+      "to": "old/figures/c2dla_detail.log",
+      "sha256": "4ed40b09506f029692e025ad8c54e776850258fb232161061ac6c85237da8146"
+    },
+    {
+      "from": "figures/teaser.pdf",
+      "to": "old/figures/teaser.pdf",
+      "sha256": "0df418429da7473e6f08c4f0457e246fb20e49373bd5a5960aea46a70584730b"
+    },
+    {
+      "from": "figures/architecture_overview.tex",
+      "to": "old/figures/architecture_overview.tex",
+      "sha256": "102cabf054b29b0e77e60762a703ccf68b204abb4759837b2536cddeb219b2e6"
+    },
+    {
+      "from": "figures/c2dla_detail.pdf",
+      "to": "old/figures/c2dla_detail.pdf",
+      "sha256": "f87dc7ff0ab039076d7dc0f0cc4494d713c5b8c30e283a5fe72b7c956eeaf914"
+    },
+    {
+      "from": "figures/teaser.log",
+      "to": "old/figures/teaser.log",
+      "sha256": "5dc960086fa6aa8b7cf74d37a5fe84faf7cdd46d3fb7669b3e1b859774659193"
+    },
+    {
+      "from": "figures/teaser.tex",
+      "to": "old/figures/teaser.tex",
+      "sha256": "374e6e7a733bbfc65bd7b9f89c3dcbb9551f9bb3dd13ae5f2d00ee45190bef44"
+    },
+    {
+      "from": "figures/architecture_styles.tex",
+      "to": "old/figures/architecture_styles.tex",
+      "sha256": "e56b2eded6ae6f1e986d2882f8ba331b25de45f8ca61117276e2877f395168b0"
+    },
+    {
+      "from": "figures/c2dla.tikz",
+      "to": "old/figures/c2dla.tikz",
+      "sha256": "4a4e1128573ed6b299d849a634367dc5cf6ecb0a12bf456253e3b87a21a24818"
+    },
+    {
+      "from": "figures/c2dla_detail.tex",
+      "to": "old/figures/c2dla_detail.tex",
+      "sha256": "83375054b057b447ed8d672f001a384306038b46a9572248675385832a3212f8"
+    },
+    {
+      "from": "figures/architecture_overview.pdf",
+      "to": "old/figures/architecture_overview.pdf",
+      "sha256": "26328b199eb8b9ab5fadace1634ab6e3fc48405842c1a382d74ebb7db12fdd74"
+    },
+    {
+      "from": "figures/architecture_overview.log",
+      "to": "old/figures/architecture_overview.log",
+      "sha256": "8ecbf754d0032fe04ed962b65ba454848a12bc2ce8b5d9905cb2aa73fd0d4180"
+    },
+    {
+      "from": "figures/architecture_overview.png",
+      "to": "old/figures/architecture_overview.png",
+      "sha256": "528e9bc6602ad0c6819fbf467994ff7ba5ea5b4dff102d43cbb03190ea99f305"
+    },
+    {
+      "from": "figures/c2dla_detail.png",
+      "to": "old/figures/c2dla_detail.png",
+      "sha256": "748f9217e7bf7084683fed9789cf267e7b84c51dff130b038b62c1cdd3092def"
+    },
+    {
+      "from": "figures/teaser.aux",
+      "to": "old/figures/teaser.aux",
+      "sha256": "fbabe80c887f95a1ede6847f22dd91b380bda9d17ae8bfaa72e1741b16aa41e9"
+    },
+    {
+      "from": "figures/c2dla_detail.aux",
+      "to": "old/figures/c2dla_detail.aux",
+      "sha256": "fbabe80c887f95a1ede6847f22dd91b380bda9d17ae8bfaa72e1741b16aa41e9"
+    },
+    {
+      "from": "figures/architecture_overview.aux",
+      "to": "old/figures/architecture_overview.aux",
+      "sha256": "fbabe80c887f95a1ede6847f22dd91b380bda9d17ae8bfaa72e1741b16aa41e9"
+    }
+  ],
+  "current": {
+    "figures/architecture_overview.pdf": "00f943cd4a99cdfcd2026cd2c327a9a771825c05a51e7b933655e7a2bd93ffae",
+    "figures/c2dla_detail.pdf": "310c11a566f770178d06de44796e37a64b7bf568ae57cb2b19dce781b01bd434",
+    "figures/teaser.pdf": "3d9961aea873ec4a9e831dbb083c7640e1f6f36f2cab0b187e78eea08effb516"
+  },
+  "known_issue": null,
+  "validation": {
+    "pages": 8,
+    "pdf_sha256": "db31519bba0ddf9fbbfbdb99e53335da537adabf20671ad81612b7595b2e1f1b",
+    "visual_review_pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "format_preflight": "passed",
+    "archived_files_hash_check": "passed",
+    "supplied_pdfs_unchanged": true,
+    "note": "Corrected projection label verified against source code and manuscript equations; PDF rebuilt and format preflight passed."
+  },
+  "replaced_versions": [
+    {
+      "file": "figures/c2dla_detail.pdf",
+      "sha256": "a75d9c12a1ef406d27d14fb6b7eb01f088449b5338292e0b3f4fcd4b89076bf3",
+      "reason": "Author corrected the post-softmax projection label from C -> d to d -> C."
+    }
+  ],
+  "correction_verified": {
+    "date": "2026-09-14",
+    "post_softmax_projection": "d -> C",
+    "implementation": "ultralytics/nn/modules/block.py: proj_attn = nn.Conv2d(self.k_dim, c, 1, bias=False)",
+    "manuscript": "sections/method.tex: phi_a:d -> C"
+  }
+}

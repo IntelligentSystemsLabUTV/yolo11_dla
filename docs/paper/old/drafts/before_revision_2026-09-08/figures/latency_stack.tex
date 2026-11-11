@@ -1,0 +1,54 @@
+% Stacked per-stage accounting; bar lengths are the median stage times of
+% Table~\ref{tab:e2e}. Horizontal unit: 1 ms.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.090cm, y=1cm,
+  lab/.style={font=\scriptsize, anchor=east},
+  tot/.style={font=\scriptsize, anchor=west}]
+
+\definecolor{cpre}{RGB}{190,190,190}
+\definecolor{cio}{RGB}{235,180,60}
+\definecolor{ceng}{RGB}{110,145,205}
+\definecolor{cpost}{RGB}{140,180,120}
+
+\newcommand{\stackbar}[6]{%
+  \node[lab] at (-1,#1+0.21) {#6};
+  \fill[cpre]  (0,#1) rectangle (#2,#1+0.42);
+  \fill[cio]   (#2,#1) rectangle (#2+#3,#1+0.42);
+  \fill[ceng]  (#2+#3,#1) rectangle (#2+#3+#4,#1+0.42);
+  \fill[cpost] (#2+#3+#4,#1) rectangle (#2+#3+#4+#5,#1+0.42);
+  \draw[very thin] (0,#1) rectangle (#2+#3+#4+#5,#1+0.42);
+}
+
+\stackbar{0}{4.900}{2.843}{8.153}{3.250}{11n / GPU}
+\node[tot] at (19.15,0.21) {19.203};
+\stackbar{-0.60}{4.572}{3.848}{7.560}{3.717}{11-DLA-n / GPU}
+\node[tot] at (19.70,-0.39) {19.831};
+\stackbar{-1.20}{8.617}{4.002}{35.198}{4.866}{11n / DLA+GPU}
+\node[tot] at (52.69,-0.99) {52.782};
+\stackbar{-1.80}{8.946}{13.992}{27.788}{5.711}{11-DLA-n / DLA}
+\node[tot] at (56.44,-1.59) {56.497};
+
+\draw[->] (0,-2.05) -- (64,-2.05);
+\foreach \x in {0,10,20,30,40,50,60}
+  {\draw (\x,-2.00) -- (\x,-2.12) node[below, font=\scriptsize] {\x};}
+\node[font=\scriptsize, anchor=north] at (32,-2.42) {median stage latency (ms)};
+
+\fill[cpre] (0,-2.95) rectangle (3,-2.79);
+\node[font=\scriptsize, anchor=west] at (3.6,-2.87) {pre};
+\fill[cio] (12,-2.95) rectangle (15,-2.79);
+\node[font=\scriptsize, anchor=west] at (15.6,-2.87) {I/O};
+\fill[ceng] (24,-2.95) rectangle (27,-2.79);
+\node[font=\scriptsize, anchor=west] at (27.6,-2.87) {engine};
+\fill[cpost] (42,-2.95) rectangle (45,-2.79);
+\node[font=\scriptsize, anchor=west] at (45.6,-2.87) {post};
+\end{tikzpicture}
+\caption{Per-stage accounting of the repeated-image pipeline check, reference
+implementation, single-threaded CPU pre- and post-processing
+(Table~\ref{tab:e2e}). I/O is input packing plus H2D, plus D2H plus output
+unpacking. Numbers at the right are median totals; because stage medians are
+computed independently they need not sum exactly to the median total. The
+strict DLA row is the only one whose I/O stage carries a DLA-native layout
+conversion, and the only one whose engine stage uses no GPU.}
+\label{fig:stack}
+\end{figure}

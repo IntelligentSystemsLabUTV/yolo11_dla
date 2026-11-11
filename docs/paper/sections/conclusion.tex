@@ -1,0 +1,21 @@
+\section{Conclusion}
+Verified fallback-free placement of a modern detector on DLA is achievable, and
+at the measured operating point it costs more in the application pipeline than
+the same network on GPU, with the boundary rather than the accelerator
+accounting for the difference.
+For YOLO11, the resulting adaptation combines C2DLA with a static raw prediction boundary;
+fallback-disabled compilation and engine inspection verify one DLA loadable
+in FP16 and INT8 on the tested Orin/TensorRT stack. FP16 nearly preserves
+adapted GPU aggregate AP. Relative to FP16, INT8 reduces strict DLA engine-plus-transfer latency,
+application-pipeline latency, and module energy at 10\,Hz, with an accuracy cost.
+Adapted GPU remains faster and lower-energy at this operating point.
+
+The case study shows that DLA adaptation is not only an operator-replacement
+problem. The prediction boundary, tensor layouts, host processing, and placement
+checks also matter. Concurrent robotic workloads remain outside this evaluation. Whether removing
+the learned detector from GPU compute benefits them is the open question this
+case study raises but does not answer: the measured 7--10\% GR3D utilization
+shows the GPU is not idle during strict execution, and the strict configuration
+occupies the platform for longer per frame, so a system-level test with a
+competing workload is required before any such benefit can be claimed.
+Other models and DLA configurations require their own validation.

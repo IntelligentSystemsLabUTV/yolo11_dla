@@ -24,13 +24,9 @@ Every number in the paper comes from one board. The values below are not a recom
 
 ## Containers
 
-Both containers are DUA environment images and are checked in under [`../docker/`](../docker/).
+Both containers are DUA environment images, checked in under [`../docker/`](../docker/). `container-jetson6` is the JetPack 6 image in which every Jetson measurement ran: privileged, NVIDIA container runtime, host networking, workspace bind-mounted at `/home/neo/workspace`, which is why recorded absolute paths in the manifests begin with that prefix. `container-x86-cudev` is the x86 CUDA image used for training and host-side analysis.
 
-`container-jetson6` is the JetPack 6 image in which every Jetson measurement ran — builds, calibration, parity, accuracy, `trtexec` microbenchmarks, the application pipeline and the energy campaigns. It is privileged, uses the NVIDIA runtime and host networking, and mounts the workspace at `/home/neo/workspace`, which is why recorded absolute paths in the manifests begin with that prefix.
-
-`container-x86-cudev` is the x86 CUDA development image used for training the checkpoint and for host-side analysis.
-
-`tegrastats` is not present inside the Jetson container. For the energy campaigns the host binary was copied in once:
+`tegrastats` is not present in the Jetson image. For the energy campaigns the host binary was copied into the running container once:
 
 ```bash
 # on the Jetson host
@@ -49,11 +45,11 @@ Reading the evidence requires nothing. Regenerating derived artifacts requires:
 
 | Task | Needs |
 |---|---|
-| `run.py audit`, `make -C tools/paper precision-results` | Python, NumPy, Matplotlib |
-| `run.py extract-checkpoint` | PyTorch, and the checkpoint in `logs/` |
+| `run.py audit`, `run.py precision-results` | Python, NumPy, Matplotlib |
+| `make -C docs/paper` | Tectonic |
+| `run.py check-paper` | PyMuPDF |
+| `run.py extract-checkpoint` | PyTorch, and the checkpoint in `weights/` |
 | `run.py check-model` | ONNX, ONNX Runtime, PyTorch |
-| `make -C tools/paper check` | PyMuPDF |
-| `make -C tools/paper` | Tectonic |
 | `pytest tools/experiments/tests` | pytest, NumPy |
 | Anything that touches an engine | The target board, its TensorRT, and the Ultralytics fork on `PYTHONPATH` |
 

@@ -1,0 +1,58 @@
+\section{Introduction}
+\label{sec:introduction}
+Object detection on an embedded robot operates within a shared compute budget.
+The same GPU may execute detection, mapping, learned navigation, and manipulation
+policies. NVIDIA Jetson platforms that include a Deep Learning Accelerator
+(DLA) offer another execution resource for convolutional networks. Moving a
+detector's learned computation to this accelerator is therefore a useful design
+option, even when the GPU provides lower isolated latency. Whether that option
+improves a robot's behavior depends on the resulting accuracy, application
+latency, and interference with concurrent workloads.
+
+A deployment option must first be executable. TensorRT can request DLA
+placement while allowing unsupported regions to execute on the GPU
+\cite{nvidia_dla_working}. Such a build can run successfully without providing
+complete offloading. Supported operator names alone are insufficient: tensor
+shapes, normalization axes, precision, and physical I/O layouts also constrain
+placement. A detector that is efficient on a GPU may consequently become a
+sequence of DLA subgraphs and GPU kernels, with additional layout conversion
+between them.
+
+YOLO11 \cite{jocher2024yolo11} illustrates this difficulty. Its convolutional
+backbone and neck coexist with spatial self-attention and a decoded prediction
+interface. The attention forms matrix products that DLA rejects, while the
+usual head flattens feature maps and decodes boxes through an interface that
+also prevents strict compilation. Merely enabling GPU fallback leaves both
+sources of incompatibility in the deployed system.
+
+We present \emph{YOLO11-DLA}, a localized adaptation that preserves the
+surrounding YOLO11 architecture and its distributional detection head. We
+replace the terminal C2PSA attention block with C2DLA, which combines
+input-dependent channel normalization with local convolution. We also replace
+the exported head interface with three raw, static, four-dimensional prediction
+maps. Box decoding, confidence filtering, and non-maximum suppression (NMS)
+then execute on the host. The evaluated nano instance is denoted \model;
+DLA throughout means NVIDIA's accelerator.
+
+Our scope is complete placement of the \emph{learned graph} on one DLA core.
+It does not include image preprocessing or variable-cardinality detection
+post-processing, and it does not imply that CUDA services, transfers, or shared
+DRAM disappear. This distinction is essential when interpreting the robotics
+motivation: eliminating GPU-assigned learned layers is a verifiable property,
+whereas recovering GPU capacity for another task is a system-level hypothesis.
+
+The contribution is threefold. First, we give an implemented YOLO11 adaptation
+with explicit equations, tensor interfaces, and a compiler-based acceptance
+criterion. Second, we characterize strict FP16 execution against both a GPU
+control and stock YOLO11n with DLA fallback, using build records, engine
+inspection, timing traces, and layer profiles. Third, we connect that deployment
+boundary to its host-side costs and specify the outstanding tests needed to
+establish numerical correctness and utility under a robotic workload.
+
+The current evidence establishes compatibility and its measured latency tradeoff.
+The adapted graph compiles as one DLA loadable, whereas stock YOLO11n fails
+strict compilation. Its median engine-plus-transfer latency is 20.7\% lower
+than the stock fallback configuration, but 7.86 times its own GPU latency.
+Neither energy savings nor improved concurrent-task performance are assumed
+from that placement result. Missing measurements appear as numbered
+placeholders so that the completed study can replace them directly.

@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "scope": "Editorial/methodological rewrite of the source current at the latest request; no result recomputation or new experiment.",
+  "pages": 8,
+  "equation_environments_byte_identical": true,
+  "equation_numbers": 12,
+  "equation_figure_table_numbers_unchanged": true,
+  "figure_and_table_references_valid": [
+    "fig:boundary",
+    "fig:c2dla",
+    "fig:latency",
+    "fig:profile",
+    "fig:teaser",
+    "tab:accuracy",
+    "tab:e2e",
+    "tab:energy",
+    "tab:engine"
+  ],
+  "numerical_value_tokens_unchanged_by_source": true,
+  "table_bodies_byte_identical": true,
+  "figure_assets_and_sizes_unchanged": true,
+  "bibliography_unchanged": true,
+  "reference_numbers_unchanged": true,
+  "first_person_authorial_matches": 0,
+  "anonymity": "Anonymous Authors; no author metadata, identifying source paths, links or bookmarks in the compiled paper.",
+  "visual_review_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "limitations_retained": [
+    "No fallback-disabled stock INT8 build attempted.",
+    "One YOLO11 nano variant, one Jetson/TensorRT stack, fixed input conditions.",
+    "No concurrent workload measurements or validated transfer to other models.",
+    "No isolated explanation for stock INT8 fallback accuracy loss."
+  ],
+  "training_dataset_note": "The current manuscript already specifies COCO train2017; this statement is retained. The historical coco-bbox.yaml is absent, so its contents were not independently reconstructed.",
+  "pdf_sha256": "d64d76a91e5c5ebe15f1de253a8535c21c6fbce53b1935a2a99070d6d770d6e2",
+  "sources_sha256": {
+    "main.tex": "d58e0ac6fb307535fe3d11bf132c3ed27b2ccd5d8716117cd6c23172305e8b8d",
+    "sections/conclusion.tex": "3969238e62493bfd1e3ad9c9f0c4f0b61ea73dca4d7daed60d04073b9fb59c19",
+    "sections/deployment.tex": "86078c49fde88069ab62160abeba5acc56596ae9fee26e46be1f402e1b4defdb",
+    "sections/discussion.tex": "d1dc074c3eeba3e2e9f591f5349bc4144a2e62a1394dd9bc12a9011d6c7007f1",
+    "sections/evaluation.tex": "6f8028e17b14a9e734aa9891d36abe4f271921c0178222444d3a1b479ecc2e3e",
+    "sections/introduction.tex": "a2ff9a5583a813111f4629c9426df90e21dc54864a77cfac83f6584279cfdd27",
+    "sections/method.tex": "949ca12fd0e079372798fb75f28dc90960ac0ed1aa9db4137ceac264641f0526",
+    "sections/related_work.tex": "d3bf0323cd872e915b93665f26e37bd8589c1e8577532308d80493bb4aeb39c4",
+    "figures/boundary.tex": "284624738fd57595e4e73366141104b38cde7c504830602f940571d5c07548c0",
+    "figures/c2dla.tex": "fd764c4f2d165a1e8d5178f4f0f18ef9b81e35c9cd86f73c12bdae5c987deda5"
+  }
+}

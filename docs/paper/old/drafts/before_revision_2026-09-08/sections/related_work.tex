@@ -1,0 +1,44 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph*{Hardware-aware model design}
+Hardware-aware architecture search replaces complexity proxies with objectives
+measured on a target platform. MnasNet and ProxylessNAS place measured or
+predicted latency inside architecture selection
+\cite{tan2019mnasnet,cai2019proxyless}, Once-for-All amortizes specialization
+over many deployment constraints \cite{cai2020ofa}, and MCUNet co-designs its
+search space with the inference runtime around device memory and operator limits
+\cite{lin2020mcunet}. These methods optimize \emph{within} a design space that
+is assumed to be executable. The question here precedes them: whether a given
+graph is admissible at all under a fixed-function contract, and what the cheapest
+edit that makes it admissible costs. Once admissibility is treated as a hard
+constraint rather than an objective term, search is the natural follow-up and not
+a substitute.
+
+\paragraph*{Real-time and embedded detection}
+YOLO formulates detection as dense prediction in a single network
+\cite{redmon2016yolo}; later systems advance the real-time frontier with
+efficient backbones, multi-scale fusion, better assignment, and end-to-end
+prediction \cite{wang2023yolov7,wang2024yolov10}, and YOLO-ReT adapts feature
+interaction for edge GPUs \cite{ganesh2022yoloret}. Ultralytics YOLO11
+\cite{jocher2024yolo11} is our reference: C3k2 blocks, a path-aggregation neck,
+position-sensitive attention, and distributional box regression
+\cite{li2020gfl}. Its modularity is what makes a localized, weight-preserving
+substitution possible, and its accuracy is what makes the retained accuracy
+meaningful. Our independent variable is not the accuracy--latency frontier on a
+GPU but the placement of the graph on a different class of processor.
+
+\paragraph*{Accelerator deployment and graph compilers}
+TensorRT can assign supported layers to DLA and optionally run the remainder on
+the GPU \cite{nvidia_dla_build}; the documented restrictions cover precision,
+tensor dimensions, convolution, resize, concatenation, slice, activation, and
+softmax \cite{nvidia_dla_working,nvidia_dla_restrictions}. Graph compilers such
+as TVM fuse operators and lower networks onto hardware-specific primitives
+\cite{chen2018tvm}, but compilation cannot make an inadmissible operator
+admissible, which is why we use fallback-free compilation as an acceptance test
+rather than as an optimization target. On the model side, the substitution we
+need is a spatial mixer without matrix multiplication; external attention shows
+that pairwise spatial affinity can be replaced by learned projections through a
+compact memory \cite{guo2023external}, and we adopt that idea in the narrow form
+that preserves the reference block's interface and residual structure so that
+pretrained weights remain usable.

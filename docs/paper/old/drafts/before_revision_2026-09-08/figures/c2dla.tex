@@ -1,0 +1,54 @@
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+    op/.style={draw, rounded corners=2pt, align=center, minimum height=6.4mm,
+               minimum width=8.5mm, inner xsep=2.5pt, font=\scriptsize},
+    conv/.style={op, fill=blue!10},
+    act/.style={op, fill=violet!12},
+    io/.style={op, fill=gray!14, minimum width=6mm},
+    sum/.style={draw, circle, inner sep=0.5pt, font=\scriptsize},
+    ar/.style={-{Latex[length=1.6mm]}, thick}
+]
+\node[io]   at (0.25,-0.65) (b)   {$X$};
+\node[conv] at (1.45,0)     (pk)  {$\phi_k$};
+\node[act]  at (2.75,0)     (sm)  {softmax\\over $C$};
+\node[conv] at (4.05,0)     (pa)  {$\phi_a$};
+\node[conv] at (1.45,-1.30) (pv)  {$\phi_v$};
+\node[conv] at (2.75,-1.30) (dw)  {DW $3\!\times\!3$};
+\node[sum]  at (4.95,-0.65) (s1)  {$+$};
+\node[conv] at (5.75,-0.65) (po)  {$\phi_o$};
+\node[sum]  at (6.55,-0.65) (r1)  {$+$};
+\node[conv] at (7.40,-0.65) (ffn) {FFN};
+\node[sum]  at (8.25,-0.65) (r2)  {$+$};
+\node[io]   at (9.00,-0.65) (out) {$X''$};
+
+\draw[ar] (b.east) -- ++(0.18,0) |- (pk.west);
+\draw[ar] (b.east) -- ++(0.18,0) |- (pv.west);
+\draw[ar] (pk) -- (sm);
+\draw[ar] (sm) -- (pa);
+\draw[ar] (pv) -- (dw);
+\draw[ar] (pa.east) -| (s1.north);
+\draw[ar] (dw.east) -| (s1.south);
+\draw[ar] (s1) -- (po);
+\draw[ar] (po) -- (r1);
+\draw[ar] (r1) -- (ffn);
+\draw[ar] (ffn) -- (r2);
+\draw[ar] (r2) -- (out);
+% residual around the mixer, Eq. (8)
+\draw[ar] (0.25,-0.34) -- (0.25,0.80) -- (6.55,0.80) -- (r1.north);
+% residual around the FFN, Eq. (9)
+\draw[ar] (6.55,-0.96) -- (6.55,-1.95) -- (8.25,-1.95) -- (r2.south);
+\end{tikzpicture}%
+}
+\caption{One C2DLA mixing block, i.e.\ Eqs.~\eqref{eq:kv}--\eqref{eq:res2}.
+Only this branch differs from the reference C2PSA block: the pairwise spatial
+attention becomes a rank-$d$ channel-softmax bottleneck built from $1\times1$
+convolutions, while the positional depthwise convolution on $V$, both
+residuals, and the feed-forward block (two $1\times1$ convolutions with SiLU
+between them) are inherited. $X$ is the processed half of the enclosing
+split--process--merge structure, which is also inherited; independent $\phi_k$
+and $\phi_v$ replace the reference fused QKV projection so that no channel
+slice and no shape-helper subgraph reaches the compiler.}
+\label{fig:c2dla}
+\end{figure}

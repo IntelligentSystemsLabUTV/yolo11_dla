@@ -1,0 +1,11 @@
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/c2dla.tikz}}
+\caption{\textbf{C2DLA from module to operators.} (a) The retained split--process--merge
+ structure, with dimensions for the nano model's $20\times20$ stage.
+ (b) The processed branch replaces spatial self-attention with channel softmax and
+ local depthwise convolution. Both residual additions and the pointwise FFN are retained.
+ C denotes channel concatenation in (a); $+$ denotes elementwise addition in (b).
+ The softmax is input-dependent but does not mix distant spatial positions.}
+\label{fig:c2dla}
+\end{figure*}

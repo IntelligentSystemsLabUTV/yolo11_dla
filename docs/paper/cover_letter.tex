@@ -1,0 +1,40 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage[top=3cm,bottom=2cm,left=2.5cm,right=2.5cm]{geometry}
+\pagenumbering{gobble}
+
+\begin{document}
+
+\noindent Program Chairs\\
+2027 IEEE International Conference on Robotics and Automation (ICRA 2027)\\
+
+\noindent Dear Program Chairs,\\
+
+My name is Alexandru Cretu, Ph.D. student in the Department of Civil Engineering and Computer Science Engineering at the University of Rome Tor Vergata, Italy.
+
+Please find attached our manuscript entitled
+``Fallback-Free Is Not Free: Accuracy, Latency, and Energy Costs of Full DLA Placement for YOLO11'',
+submitted for consideration at the 2027 IEEE International Conference on Robotics and Automation (ICRA 2027).
+
+This work studies the deployment of modern object detectors on the NVIDIA Deep Learning Accelerator (DLA) in embedded robotic systems. In particular, it addresses an important distinction between requesting DLA execution and verifying that the complete learned graph is actually placed on DLA without GPU fallback.
+
+Using YOLO11 as a case study, we introduce an accelerator-compatible adaptation based on C2DLA, which replaces unsupported spatial attention, and DetectDLA, which moves the prediction boundary to static raw feature maps for host-side decoding. Fallback-disabled TensorRT compilation and optimized-engine inspection verify that the resulting YOLO11-DLA-n model is executed as a single DLA loadable without GPU-assigned learned layers in both FP16 and mixed INT8 configurations.
+
+The experimental evaluation shows that accelerator-level improvements do not directly translate into application-level gains. In INT8, the strict DLA inference stage is faster than the same adapted network on GPU (4.522 ms versus 6.400 ms), but native DLA input and output boundaries introduce substantial host-side cost. As a result, the complete strict-DLA application pipeline reaches 30.675 ms median latency, compared with 18.212 ms on the adapted GPU implementation. The study also evaluates deployed accuracy and module energy, showing that full DLA placement must be considered jointly with quantization, tensor layouts, host processing, and system-level execution costs.
+
+We believe the manuscript is relevant to ICRA because it addresses hardware-aware robotic perception and the practical deployment of deep neural networks on heterogeneous embedded compute platforms. The work provides both a verified accelerator-placement case study and a detailed characterization of the consequences of moving learned perception away from GPU compute, which is particularly relevant to robotic systems where perception, localization, planning, and control share limited computational resources.
+
+The manuscript is original, has not been published previously, and is not under consideration for publication elsewhere. All authors have approved the manuscript and agree with its submission to ICRA 2027.
+
+Thank you for considering our work.
+
+\vspace{1em}
+\noindent Sincerely,\\
+Alexandru Cretu\\
+Dipartimento di Ingegneria Civile e Ingegneria Informatica\\
+Università degli Studi di Roma Tor Vergata\\
+Email: alexandru.cretu@uniroma2.it\\
+
+\end{document}

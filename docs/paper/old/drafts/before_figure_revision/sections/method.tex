@@ -1,0 +1,141 @@
+\section{YOLO11-DLA}
+\label{sec:method}
+\input{figures/boundary}
+\subsection{Design Objective and Scope}
+Let $G_0$ denote the reference learned graph and $G$ the adapted graph. We
+seek a useful detector subject to
+\begin{equation}
+ \operatorname{Build}_{\mathrm{DLA}}(G;\theta,\mathrm{fallback}=0)
+ = E, \qquad N_{\mathrm{GPU}}(E)=0,
+ \label{eq:accept}
+\end{equation}
+where $\theta$ fixes the target, compiler version, precision, shapes, and
+I/O formats, $E$ is the serialized engine, and $N_{\mathrm{GPU}}$ counts
+GPU-assigned learned layers after optimization. For the evaluated artifact we
+also require one DLA loadable. These are deployment criteria, not terms in the
+training loss. Accuracy and application performance must be evaluated after
+this feasibility gate.
+
+We retain the convolutional stem, C3k2 stages, SPPF module, feature-pyramid
+connections, and detection towers of YOLO11n. Two module substitutions define
+the adaptation:
+\begin{equation}
+ \mathrm{C2PSA}\longrightarrow\mathrm{C2DLA},\qquad
+ \mathrm{Detect}\longrightarrow\mathrm{DetectDLA}.
+ \label{eq:substitutions}
+\end{equation}
+The first changes a learned computation; the second changes the export
+boundary while preserving the ordinary training path. This separation permits
+an architecture comparison on the GPU and a placement comparison using the
+same adapted graph. It does not make the stock and adapted engine interfaces
+identical.
+
+\subsection{C2DLA: Channel Mixing with Local Context}
+\label{sec:c2dla}
+\input{figures/c2dla}
+C2DLA keeps C2PSA's split--process--merge structure. An initial $1\times1$
+projection produces two channel groups; one bypasses the inner block and the
+other is processed before concatenation and a final projection. If $X$ is the
+processed group with $C$ channels, define
+\begin{align}
+ K &= \phi_k(X), \qquad V=\phi_v(X), \label{eq:kv}\\
+ A_{bkhw} &= \frac{\exp K_{bkhw}}{\sum_{j=1}^{d}\exp K_{bjhw}},
+ \label{eq:chansoftmax}\\
+ Z &= \phi_o\bigl(\phi_a(A)+\psi_{3\times3}(V)\bigr),
+ \label{eq:mix}\\
+ X' &= X+Z, \label{eq:res1}\\
+ X'' &= X'+\operatorname{FFN}(X'). \label{eq:res2}
+\end{align}
+Here $d=\max(\lfloor C/4\rfloor,8)$; $\phi_k:C\to d$,
+$\phi_v:C\to C$, $\phi_a:d\to C$, and $\phi_o:C\to C$ are
+$1\times1$ projections. The operator $\psi$ is a $3\times3$ depthwise
+convolution. The FFN expands channels from $C$ to $2C$, applies SiLU, and
+projects back to $C$. Batch normalization accompanies the relevant convolution
+modules and is folded into them for inference; $\phi_a$ is a bias-free
+convolution without batch normalization.
+
+For the nano configuration, the enclosing block receives 256 channels, the
+processed group has $C=128$, the bottleneck has $d=32$, and one inner block
+operates at the $20\times20$ scale. All operations preserve the four-dimensional
+batch--channel--height--width representation. Unlike the original attention,
+there is no spatial affinity matrix, matrix multiplication, head transpose,
+or normalization over image positions.
+
+The softmax output remains input-dependent: changing a pixel's feature vector
+changes its channel weights. However, this branch independently transforms
+each spatial position, and its projection back to $C$ channels does not provide
+global information exchange. The depthwise branch supplies local spatial
+context. The substitution therefore changes the hypothesis class and requires
+empirical accuracy evaluation; it is not an algebraic equivalence.
+
+The key and value projections are separate convolutions. This avoids introducing
+a fused-QKV extraction subgraph in the replacement branch. Static channel
+splits elsewhere in the retained network remain present and compile successfully
+in the measured configuration. Thus, the implementation does not depend on a
+claim that every split or SiLU is unsupported on DLA.
+
+\subsection{DetectDLA: A Static Prediction Boundary}
+\label{sec:boundary}
+For each pyramid level $\ell\in\{3,4,5\}$, the retained regression and
+classification towers produce $R_\ell$ and $S_\ell$. DetectDLA exports
+\begin{equation}
+ P_\ell=\operatorname{Concat}_{C}(R_\ell,S_\ell)
+ \in\mathbb{R}^{B\times(4r+n_c)\times H_\ell\times W_\ell},
+ \label{eq:packed}
+\end{equation}
+with $r=16$ regression bins and $n_c=80$ COCO classes. For batch one and
+$640\times640$ images, the outputs are $1\times144\times80\times80$,
+$1\times144\times40\times40$, and $1\times144\times20\times20$ at strides
+8, 16, and 32. They are named \texttt{pred\_p3}, \texttt{pred\_p4}, and
+\texttt{pred\_p5}. Classification values are logits; box channels are
+unnormalized distributions, not decoded coordinates.
+
+In export mode, the head stops before flattening, cross-scale concatenation,
+DFL expectation, grid decoding, and sigmoid. NMS is also outside the engine.
+During training and ordinary PyTorch inference, DetectDLA invokes the inherited
+Detect path, retaining its losses and assignment behavior. No direct-regression
+or one-to-one head is introduced in this study.
+
+The static maps make the execution boundary explicit. Stock YOLO11n's engine
+instead emits a decoded $1\times84\times8400$ tensor. At FP16, the adapted
+outputs contain 2,419,200 bytes, compared with 1,411,200 bytes for the stock
+output, a factor of 1.714. Consequently, a lower raw-engine latency does not
+by itself establish a faster complete detector: the adapted pipeline transfers
+more data and performs additional host decoding.
+
+\begin{table}[t]
+\caption{The evaluated adaptation. Unchanged denotes retained structure, not
+identical trained weights.}
+\label{tab:design}\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{.26\columnwidth}p{.31\columnwidth}p{.32\columnwidth}}
+\toprule
+Component & YOLO11n & \model \\
+\midrule
+Stem, C3k2, SPPF, neck & Reference structure & Unchanged \\
+Terminal mixer & Spatial self-attention & Channel softmax and local DWConv \\
+Box/class towers & Distributional boxes; class logits & Unchanged \\
+Training head & Original Detect & Inherited Detect path \\
+Export output & One decoded rank-3 tensor & Three raw rank-4 tensors \\
+Host detection logic & NMS & DFL, sigmoid, NMS \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training and Initialization}
+The compatible structure permits transfer of shape-matched parameters from a
+YOLO11 checkpoint before fine-tuning. The accompanying code also contains an
+optional block-aware initializer that gathers compatible key/value projection
+channels and copies positional and output projections. The new channel
+projection has no direct self-attention counterpart. This optional path and a
+staged freeze/unfreeze recipe are implementation capabilities; the retained
+checkpoint does not establish that either was used for its training run.
+
+The checkpoint actually evaluated here contains a 500-epoch training history,
+with batch size 32, image size 640, seed 0, automatic optimizer selection,
+pretrained initialization requested, AMP enabled, and no frozen layers in the
+stored training arguments. It contains 2,615,696 unfused parameters. The exact
+initialization source and realized optimizer settings must be recovered before
+attributing accuracy to a particular transfer strategy.
+\missing{P2}{archive the original training command, initialization checkpoint,
+optimizer state/log, dataset identity, and independently repeated validation}.

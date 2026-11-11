@@ -1,0 +1,180 @@
+% Before/after deployment teaser, redrawn as a vector diagram.
+% Left  : stock YOLO11n requested on DLA -> heterogeneous DLA+GPU fallback engine.
+% Right : YOLO11-DLA -> complete learned graph in one DLA loadable, host tail outside.
+% Base palette (archInk/archTeal/archMint/archGray/archGold) from architecture_styles.tex.
+\providecolor{archGrayEdge}{HTML}{9BA6B2}
+\providecolor{archBoxGray}{HTML}{DADEE1}
+\providecolor{archCellGray}{HTML}{EDEFF2}
+\providecolor{nodeDla}{HTML}{C2DAD7}
+\providecolor{nodeGpu}{HTML}{CBD3DA}
+\providecolor{nodeGpuEdge}{HTML}{8F99A4}
+\providecolor{nodeRfm}{HTML}{E7EAEE}
+\providecolor{nodeRfmEdge}{HTML}{A8B0B8}
+\providecolor{nodeNop}{HTML}{F5F6F8}
+\providecolor{nodeNopEdge}{HTML}{C3C9CF}
+\providecolor{archRose}{HTML}{F9DDDE}
+\providecolor{archRoseEdge}{HTML}{BE5F5C}
+\providecolor{slabGrayFront}{HTML}{CDD2D6}
+\providecolor{slabGrayTop}{HTML}{E6E9EC}
+\providecolor{slabGraySide}{HTML}{B7BDC3}
+\providecolor{slabTealFront}{HTML}{C6E3DE}
+\providecolor{slabTealTop}{HTML}{E4F3F0}
+\providecolor{slabTealSide}{HTML}{A6CEC7}
+
+% One convolutional slab drawn as a flat parallelepiped: #1=x #2=y(bottom)
+% #3=width #4=height #5=colour base (slabGray / slabTeal).
+\newcommand{\convslab}[5]{%
+  \fill[#5Side,draw=archInk!60,line width=.4pt]
+    ({#1+#3},{#2}) -- ++(.18,.15) -- ++(0,#4) -- ++(-.18,-.15) -- cycle;
+  \fill[#5Top,draw=archInk!60,line width=.4pt]
+    ({#1},{#2+#4}) -- ++(.18,.15) -- ++(#3,0) -- ++(-.18,-.15) -- cycle;
+  \fill[#5Front,draw=archInk!60,line width=.4pt]
+    ({#1},{#2}) rectangle ++(#3,#4);}
+
+\begin{tikzpicture}[x=1cm,y=1cm,
+  ttl/.style={font=\rmfamily\bfseries\fontsize{16}{18}\selectfont,text=archInk,
+              anchor=north,inner sep=0pt},
+  mdl/.style={rounded corners=4pt,line width=.7pt,align=center,anchor=north,
+              font=\rmfamily\bfseries\fontsize{14}{16}\selectfont,text=archInk,
+              minimum width=4.0cm,minimum height=1.10cm},
+  sub/.style={font=\rmfamily\fontsize{11}{13}\selectfont,text=archInk,
+              anchor=north,inner sep=0pt},
+  io/.style={font=\rmfamily\fontsize{11}{13}\selectfont,text=archInk,inner sep=0pt},
+  dots/.style={font=\rmfamily\fontsize{12}{12}\selectfont,text=archInk,inner sep=0pt},
+  pill/.style={rounded corners=3pt,line width=.6pt,align=center,
+               font=\rmfamily\bfseries\fontsize{10.5}{12}\selectfont,text=archInk,
+               inner xsep=5pt,inner ysep=3.5pt},
+  cell/.style={rounded corners=.7pt,line width=.35pt,anchor=west,
+               minimum width=.128cm,minimum height=.44cm,inner sep=0pt},
+  cD/.style={cell,draw=archTeal!65,fill=nodeDla,minimum height=.62cm,line width=.45pt},
+  cG/.style={cell,draw=nodeGpuEdge,fill=nodeGpu},
+  cR/.style={cell,draw=nodeRfmEdge,fill=nodeRfm},
+  cN/.style={cell,draw=nodeNopEdge,fill=nodeNop},
+  cC/.style={cell,draw=nodeNopEdge,fill=nodeNop},
+  swat/.style={rounded corners=.7pt,line width=.35pt,anchor=west,
+               minimum width=.30cm,minimum height=.24cm,inner sep=0pt},
+  leg/.style={font=\rmfamily\fontsize{9}{10.5}\selectfont,text=archInk,
+              anchor=west,inner sep=0pt},
+  tot/.style={font=\rmfamily\fontsize{9.5}{11}\selectfont,text=archInk,
+              anchor=north,inner sep=0pt},
+  big/.style={rounded corners=3.5pt,line width=.9pt,align=center,anchor=west,
+              minimum height=1.40cm,text=archInk},
+  flow/.style={-{Latex[length=2mm,width=1.6mm]},draw=archInk,line width=.7pt},
+  tick/.style={-{Latex[length=1.0mm,width=1.0mm]},draw=archInk,line width=.5pt},
+  cue/.style={-{Latex[length=1.8mm,width=1.4mm]},draw=archInk!70,line width=.55pt,
+              dash pattern=on 1.6pt off 1.4pt},
+  cueT/.style={cue,draw=archTeal},
+  brc/.style={decorate,decoration={brace,mirror,amplitude=5pt,raise=1.5pt},
+              draw=archInk!75,line width=.55pt},
+  blab/.style={font=\rmfamily\fontsize{10.5}{12}\selectfont,text=archInk,
+               anchor=north,inner sep=0pt},
+]
+
+% ############################ BEFORE ############################
+\node[mdl,draw=archGrayEdge,fill=archBoxGray] at (4.15,-1.40) {Stock YOLO11n};
+\node[sub] at (4.15,-2.70) {DLA+GPU fallback deployment};
+
+% --- CNN schematic ---
+\node[io] at (1.00,-4.25) {Input};
+\draw[flow] (1.58,-4.25) -- (2.08,-4.25);
+\foreach \sx in {2.25,2.75,3.25}{\convslab{\sx}{-4.90}{.28}{1.30}{slabGray}}
+\node[dots] at (4.05,-4.20) {$\cdots$};
+\foreach \sx in {4.40,4.90,5.40}{\convslab{\sx}{-4.90}{.28}{1.30}{slabGray}}
+\draw[flow] (6.06,-4.25) -- (6.56,-4.25);
+\node[io] at (7.16,-4.25) {Output};
+
+% --- descent into the compiled engine ---
+
+% --- heterogeneous engine partition ---
+\draw[tick] (0.30,-6.50) -- (0.55,-6.50);
+\node[cR] (n0) at (0.550,-6.50) {};
+\node[cD] (n1) at (0.696,-6.50) {};
+\node[cR] (n2) at (0.842,-6.50) {};
+\node[cR] (n3) at (0.988,-6.50) {};
+\node[cG] (n4) at (1.134,-6.50) {};
+\node[cR] (n5) at (1.280,-6.50) {};
+\node[cD] (n6) at (1.426,-6.50) {};
+\node[cR] (n7) at (1.572,-6.50) {};
+\node[cR] (n8) at (1.718,-6.50) {};
+\node[cG] (n9) at (1.864,-6.50) {};
+\node[cR] (n10) at (2.010,-6.50) {};
+\node[cD] (n11) at (2.156,-6.50) {};
+\node[cR] (n12) at (2.302,-6.50) {};
+\node[cN] (n13) at (2.448,-6.50) {};
+\node[cR] (n14) at (2.594,-6.50) {};
+\node[cR] (n15) at (2.740,-6.50) {};
+\node[cN] (n16) at (2.886,-6.50) {};
+\node[cR] (n17) at (3.032,-6.50) {};
+\node[cR] (n18) at (3.178,-6.50) {};
+\node[cN] (n19) at (3.324,-6.50) {};
+\node[cR] (n20) at (3.470,-6.50) {};
+\node[cG] (n21) at (3.616,-6.50) {};
+\node[cG] (n22) at (3.762,-6.50) {};
+\node[cR] (n23) at (3.908,-6.50) {};
+\node[cG] (n24) at (4.054,-6.50) {};
+\node[cC] (n25) at (4.200,-6.50) {};
+\node[cC] (n26) at (4.346,-6.50) {};
+\node[cR] (n27) at (4.492,-6.50) {};
+\node[cN] (n28) at (4.638,-6.50) {};
+\node[cD] (n29) at (4.784,-6.50) {};
+\node[cG] (n30) at (4.930,-6.50) {};
+\node[cG] (n31) at (5.076,-6.50) {};
+\node[cC] (n32) at (5.222,-6.50) {};
+\node[cR] (n33) at (5.368,-6.50) {};
+\node[cN] (n34) at (5.514,-6.50) {};
+\node[cR] (n35) at (5.660,-6.50) {};
+\node[cR] (n36) at (5.806,-6.50) {};
+\node[cN] (n37) at (5.952,-6.50) {};
+\node[cR] (n38) at (6.098,-6.50) {};
+\node[cR] (n39) at (6.244,-6.50) {};
+\node[cN] (n40) at (6.390,-6.50) {};
+\node[cR] (n41) at (6.536,-6.50) {};
+\node[cG] (n42) at (6.682,-6.50) {};
+\node[cG] (n43) at (6.828,-6.50) {};
+\node[cG] (n44) at (6.974,-6.50) {};
+\node[cG] (n45) at (7.120,-6.50) {};
+\node[cR] (n46) at (7.266,-6.50) {};
+\draw[tick] (7.394,-6.50) -- (7.64,-6.50);
+
+% --- descent arrow (target exists now) ---
+\draw[flow] (4.118,-5.05) -- (n24.north);
+
+% --- measured composition of the optimized fallback engine ---
+\node[tot] at (3.97,-7.00) {47 nodes in the optimized engine};
+\node[swat,draw=archTeal!65,fill=nodeDla]      at (1.05,-7.58) {};
+\node[leg]                                      at (1.45,-7.58) {DLA loadable $\times$4};
+\node[swat,draw=nodeGpuEdge,fill=nodeGpu]      at (4.45,-7.58) {};
+\node[leg]                                      at (4.85,-7.58) {GPU compute $\times$11};
+\node[swat,draw=nodeRfmEdge,fill=nodeRfm]      at (1.05,-8.02) {};
+\node[leg]                                      at (1.45,-8.02) {reformat $\times$22};
+\node[swat,draw=nodeNopEdge,fill=nodeNop]      at (4.45,-8.02) {};
+\node[leg]                                      at (4.85,-8.02) {no-op / constant $\times$10};
+
+% ############################ AFTER ############################
+\node[mdl,draw=archTeal,fill=archMint,line width=.9pt] at (12.65,-1.40) {YOLO11-DLA};
+\node[sub] at (12.65,-2.70) {Strict DLA placement};
+
+% --- CNN schematic ---
+\node[io] at (9.50,-4.25) {Input};
+\draw[flow] (10.08,-4.25) -- (10.58,-4.25);
+\foreach \sx in {10.75,11.25,11.75}{\convslab{\sx}{-4.90}{.28}{1.30}{slabTeal}}
+\node[dots] at (12.55,-4.20) {$\cdots$};
+\foreach \sx in {12.90,13.40,13.90}{\convslab{\sx}{-4.90}{.28}{1.30}{slabTeal}}
+\draw[flow] (14.56,-4.25) -- (15.06,-4.25);
+\node[io] at (15.66,-4.25) {Output};
+
+% --- descent into the compiled engine ---
+\draw[flow] (12.55,-5.05) -- (12.55,-5.80);
+
+% --- one loadable ---
+\draw[tick] (9.30,-6.50) -- (9.60,-6.50);
+\node[big,draw=archTeal,fill=archMint,minimum width=6.15cm] (dlabox) at (9.60,-6.50)
+  {{\rmfamily\bfseries\fontsize{13}{15}\selectfont DLA}\\[1pt]
+   {\rmfamily\fontsize{10}{11}\selectfont (single learned graph)}};
+\draw[tick] (15.75,-6.50) -- (16.05,-6.50);
+
+% --- measured composition of the optimized strict engine ---
+\draw[brc] (9.60,-7.32) -- (15.75,-7.32);
+\node[blab] at (12.675,-7.57) {1 DLA loadable};
+\node[tot] at (12.675,-7.96) {1 node in the optimized engine};
+\end{tikzpicture}

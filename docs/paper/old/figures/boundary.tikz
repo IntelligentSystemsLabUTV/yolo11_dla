@@ -1,0 +1,88 @@
+\begin{tikzpicture}[x=1cm,y=1cm]
+\path[use as bounding box] (0,-.40) rectangle (17.7,5.12);
+% Group bands organize the model like a conventional detection architecture.
+\fill[archGray,rounded corners=3pt] (0,0.42) rectangle (5.2,4.57);
+\fill[archGray,rounded corners=3pt] (5.4,0.42) rectangle (10.45,4.57);
+\fill[archMint!45,rounded corners=3pt] (10.65,0.42) rectangle (14.75,4.57);
+\fill[archGold!55,rounded corners=3pt] (15.02,0.42) rectangle (17.7,4.57);
+\node[arch title] at (.14,4.86) {(a) Backbone};
+\node[arch title] at (5.54,4.86) {(b) Multi-scale neck};
+\node[arch title] at (10.79,4.86) {(c) DetectDLA};
+\node[arch title] at (15.16,4.86) {(d) CPU};
+\node[arch badge] at (14.45,4.86) {2};
+% Backbone and its three tapped feature scales.
+\node[arch block,text width=1.44cm,minimum width=1.65cm,minimum height=2.70cm] (backbone) at (1.06,2.41)
+ {YOLO11\\[4pt]Stem\\C3k2 stages\\SPPF};
+\node[arch small] (input) at (1.06,4.29) {RGB input\\$1\times3\times640\times640$};
+\draw[arch flow] (input.south) -- (backbone.north);
+\foreach \lev/\yy/\ww/\cc/\hh in {3/3.66/1.05/128/80,4/2.41/.85/128/40,5/1.16/.65/256/20}{
+  \begin{scope}[shift={(3.05,\yy)}]
+    \filldraw[draw=archBlueEdge,fill=archBlue!60,line width=.5pt]
+      (-\ww/2,.14)--(-\ww/2+.12,.27)--(\ww/2+.12,.27)--(\ww/2,.14)--cycle;
+    \filldraw[draw=archBlueEdge,fill=archBlue!85!archBlueEdge,line width=.5pt]
+      (\ww/2,-.14)--(\ww/2+.12,-.01)--(\ww/2+.12,.27)--(\ww/2,.14)--cycle;
+    \filldraw[draw=archBlueEdge,fill=archBlue,line width=.5pt]
+      (-\ww/2,-.14) rectangle (\ww/2,.14);
+  \end{scope}
+  \node[arch small,above] at (3.09,\yy+.29) {$\mathrm{C}_{\lev}$};
+  \node[arch small,below] at (3.09,\yy-.19) {$\cc\times\hh\times\hh$};
+  \coordinate (tap\lev) at (3.05-\ww/2,\yy);
+  \draw[arch flow] (backbone.east |- tap\lev) -- (tap\lev);
+}
+\node[arch edit,minimum width=1.12cm,minimum height=.48cm] (dla) at (4.48,1.16) {C2DLA};
+\node[arch badge] at (4.48,.68) {1};
+\draw[arch flow] (3.50,1.16) -- (dla.west);
+% Four real neck fusions; high-resolution output is shared with bottom-up path.
+\node[arch join] (cat3) at (5.86,3.66) {C};
+\node[arch join] (cat4) at (5.86,2.41) {C};
+\node[arch block,minimum width=1.12cm,minimum height=.46cm] (td3) at (7.02,3.66) {C3k2};
+\node[arch block,minimum width=1.12cm,minimum height=.46cm] (td4) at (7.02,2.41) {C3k2};
+\node[arch join] (catbu4) at (8.76,2.41) {C};
+\node[arch join] (catbu5) at (8.76,1.16) {C};
+\node[arch block,minimum width=1.03cm,minimum height=.46cm] (bu4) at (9.78,2.41) {C3k2};
+\node[arch block,minimum width=1.03cm,minimum height=.46cm] (bu5) at (9.78,1.16) {C3k2};
+\draw[arch flow] (3.71,3.66) -- (cat3);
+\draw[arch flow] (3.61,2.41) -- (cat4);
+\draw[arch flow] (cat3) -- (td3);
+\draw[arch flow] (cat4) -- (td4);
+\draw[arch flow] (dla.east) -- (catbu5);
+\draw[arch flow] (5.86,1.16) -- node[arch small,right] {$\uparrow 2$} (cat4.south);
+\draw[arch flow] (td4.north) -- (7.02,3.04) -- (5.86,3.04) -- node[arch small,left] {$\uparrow 2$} (cat3.south);
+\draw[arch flow] (td4.east) -- (catbu4);
+\draw[arch flow] (catbu4) -- (bu4);
+\draw[arch flow] (catbu5) -- (bu5);
+\node[arch block,minimum width=.97cm,minimum height=.35cm,font=\sffamily\fontsize{7}{8}\selectfont] (down4) at (8.76,3.03) {Conv $s{=}2$};
+\node[arch block,minimum width=.97cm,minimum height=.35cm,font=\sffamily\fontsize{7}{8}\selectfont] (down5) at (9.78,1.79) {Conv $s{=}2$};
+\draw[arch flow] (8.76,3.66) -- (down4.north);
+\draw[arch flow] (down4.south) -- (catbu4.north);
+\draw[arch flow] (bu4.south) -- (down5.north);
+\draw[arch flow] (down5.west) -| (catbu5.north);
+% Identical head topology at each scale; outputs remain raw, rank four.
+\foreach \lev/\yy/\hh in {3/3.66/80,4/2.41/40,5/1.16/20}{
+  \node[arch block,fill=white,text width=1.50cm,minimum width=1.72cm,minimum height=.61cm] (head\lev) at (11.74,\yy)
+    {Box + class\\64 + 80 ch.};
+  \node[arch edit,minimum width=1.78cm,minimum height=.61cm] (out\lev) at (13.83,\yy)
+    {Raw $P_{\lev}$\\$144\times\hh\times\hh$};
+  \draw[arch flow] (head\lev.east) -- (out\lev.west);
+
+}
+\draw[arch flow] (td3.east) -- (head3.west);
+\draw[arch flow] (bu4.east) -- (head4.west);
+\draw[arch flow] (bu5.east) -- (head5.west);
+% Host decoding is explicitly beyond the learned-graph boundary.
+
+\node[arch block,fill=archGold,draw=archGoldEdge,text width=1.70cm,minimum width=1.92cm,minimum height=1.62cm] (host) at (16.55,2.41)
+ {Unpack\\DFL + sigmoid\\NMS\\Rescale boxes};
+\draw[arch flow] (out3.east) -- (15.15,3.66) |- ([yshift=4.3mm]host.west);
+\draw[arch flow] (out4.east) -- (host.west);
+\draw[arch flow] (out5.east) -- (15.15,1.16) |- ([yshift=-4.3mm]host.west);
+\node[arch small] (detections) at (16.55,3.96) {Variable number\\of detections};
+\draw[arch flow] (host.north) -- (detections.south);
+\node[arch junction] at (5.86,1.16) {};
+\node[arch junction] at (8.76,3.66) {};
+\draw[archTeal,dashed,line width=.75pt] (.02,.26) -- (14.82,.26) -- (14.82,4.51);
+\node[arch small,text=archTeal,fill=white,inner xsep=4pt] at (8.72,.26) {One strict DLA loadable: learned graph + static raw outputs};
+% Compact legend, with no device-placement claims hidden in color alone.
+\node[arch small,anchor=west] at (.05,-.18) {\textbf{1} C2PSA $\rightarrow$ C2DLA\quad
+\textbf{2} raw export boundary\qquad C: channel concat\quad $\uparrow2$: nearest upsampling\quad Dimensions omit batch $B{=}1$};
+\end{tikzpicture}

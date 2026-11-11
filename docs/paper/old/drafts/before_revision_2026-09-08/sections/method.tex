@@ -1,0 +1,206 @@
+\section{Method}
+\label{sec:method}
+
+\input{figures/boundary}
+
+\subsection{Execution Contract and Admissibility}
+\label{sec:contract}
+
+Let $G=(V,E)$ be a learned perception graph and let
+$\mathcal{H}=(\mathcal{O},\mathcal{C})$ be a hardware execution contract:
+$\mathcal{O}$ is the supported operator set and $\mathcal{C}$ collects the
+configuration constraints, that is tensor rank, layout, static dimensions,
+precision, kernel parameter ranges, and admissible dataflow. Write
+$A_{\mathcal{H}}(G)=1$ when \emph{every} node of the learned graph is
+admissible, the test being supplied by the target compiler rather than by
+inspection of the source model. Offloading a detector onto a fixed-function
+accelerator is then the problem of obtaining an admissible graph that stays as
+close as possible to a reference $G_0$ with function $f_0$, which we treat as a
+Pareto problem over structural change and behavioral deviation,
+\begin{equation}
+\min_{G_R}\ \left(d_{\mathrm{arch}}(G_0,G_R),\,
+D_{\mathrm{ref}}(f_0,f_R)\right)
+\quad\text{s.t.}\quad A_{\mathcal{H}}(G_R)=1,
+\label{eq:retrofit}
+\end{equation}
+where $d_{\mathrm{arch}}$ measures structural change and $D_{\mathrm{ref}}$
+measures deviation under the task metrics and, where required, output agreement
+on representative inputs. Equation~\eqref{eq:retrofit} is a design-selection
+criterion, not an additional term in the detector's training loss. Its
+constraint is binary and supplied by the toolchain, which is what makes the
+formulation transferable: on an NPU, an Edge TPU, or an FPGA toolchain the same
+criterion applies with a different $\mathcal{H}$ and a different acceptance
+procedure. Here $G_0$ is YOLO11 \cite{jocher2024yolo11} and $\mathcal{H}$ is the
+NVIDIA DLA contract \cite{nvidia_dla_restrictions,nvidia_dla_build}, whose
+relevant clauses are that tensors be four-dimensional with static shapes, that
+no matrix multiplication appear, that slices and concatenations act on rank-four
+tensors, and that broadcasts be NCHW-compatible.
+
+\subsection{The Accelerator Boundary}
+\label{sec:boundary}
+
+Admissibility is not only a question of which operators appear; it is a question
+of where the learned graph is declared to end. A detector's terminal
+post-processing is inherently variable in cardinality: the number of surviving
+candidates depends on image content, and the standard formulation reaches it by
+flattening the pyramid into a rank-three tensor of $8400$ anchors, decoding
+distributions, building an anchor grid, and suppressing overlaps. None of that
+is admissible under $\mathcal{H}$, and worse, its inadmissibility is
+contagious. A compiler that partitions a graph by fusible regions will pull
+otherwise admissible producers into the fallback partition that feeds its
+rank-changing consumer, which is precisely the failure we characterize in
+Sec.~\ref{sec:rq2}.
+
+We therefore fix the boundary at static, raw, multi-scale predictions. The
+compiled graph accepts a fixed tensor
+$I\in\mathbb{R}^{B\times3\times H\times W}$, keeps every intermediate tensor
+four-dimensional, and for each pyramid level $\ell\in\{3,4,5\}$ returns
+\begin{equation}
+P_\ell=\operatorname{Concat}_{C}(R_\ell,S_\ell)
+\in\mathbb{R}^{B\times(4r+n_c)\times H_\ell\times W_\ell},
+\label{eq:packed}
+\end{equation}
+where $R_\ell$ holds four $r$-channel distance predictions, $S_\ell$ holds
+$n_c$ class logits, and the concatenation is over channels, which the contract
+allows on rank-four tensors. No flattening, cross-scale concatenation, anchor
+construction, top-$k$, or non-maximum suppression (NMS) is part of the compiled
+graph. The host then restores the scale-wise grids and decodes each side
+$q\in\{l,t,r,b\}$ by the distributional expectation
+\begin{equation}
+\hat d_q=\sum_{j=0}^{r-1}j\,
+\frac{\exp(R_{qj})}{\sum_{k=0}^{r-1}\exp(R_{qk})},
+\label{eq:dfl}
+\end{equation}
+converts distances relative to cell centers, multiplies by the pyramid stride,
+takes $\sigma(S_\ell)$ as class probabilities, and applies NMS.
+
+This boundary is the load-bearing design decision of the paper, and it has three
+consequences that we measure separately. First, it is what makes a single
+fallback-free loadable possible at all: with the decode inside the graph, no
+amount of operator substitution upstream produces an admissible model. Second,
+it moves work off the accelerator, so an engine-boundary comparison against a
+conventional detector is not a comparison of equal pipelines, since the
+reference model emits one decoded $1\times84\times8400$ tensor while the
+retrofit emits three raw maps and pays for their decode on the host; we
+therefore report a stage-resolved accounting (Sec.~\ref{sec:rq3}) rather than
+engine latency alone. Third, it exposes an interface in an accelerator-native
+layout: a fixed-function engine is free to demand a packed input format and to
+return channel-vectorized outputs, and the cost of meeting that demand is paid
+outside the engine, by the host, in whatever implementation the integrator
+supplies. That cost is real, it is large in our reference implementation, and it
+is not a property of the accelerator; Sec.~\ref{sec:packing} characterizes it
+explicitly.
+
+\subsection{YOLO11-DLA-n}
+\label{sec:retrofit}
+
+\input{figures/c2dla}
+
+\subsubsection{Two substitutions}
+Under $\mathcal{H}$, exactly two regions of YOLO11n are inadmissible: the
+position-sensitive attention in the terminal backbone stage, which forms a
+spatial affinity matrix by matrix multiplication, and the decoded output
+interface discussed above. The retrofit is therefore
+\begin{equation}
+\mathrm{C2PSA}\rightarrow\mathrm{C2DLA},\qquad
+\mathrm{Detect}\rightarrow\mathrm{DetectDLA},
+\label{eq:substitutions}
+\end{equation}
+and nothing else changes: the stem, all C3k2 stages, SPPF, the full
+path-aggregation neck, the channel schedule, the P3--P5 connections, the head
+towers, task-aligned one-to-many assignment, the losses, and the $r=16$
+distributional regression \cite{li2020gfl} are inherited (Fig.~\ref{fig:boundary},
+Table~\ref{tab:design}). What we compare against the reference is thus a
+structural approximation of it, not a new detector.
+
+\subsubsection{C2DLA}
+C2DLA preserves C2PSA's split--process--merge structure and its residuals, and
+replaces only the attention math (Fig.~\ref{fig:c2dla}). Let
+$X\in\mathbb{R}^{B\times C\times H\times W}$ be the processed half. One block
+computes
+\begin{align}
+K &= \phi_k(X), \qquad V = \phi_v(X), \label{eq:kv}\\
+A_{bkhw} &= \frac{\exp(K_{bkhw})}{\sum_{j=1}^{d}\exp(K_{bjhw})},
+  \label{eq:chansoftmax}\\
+Z &= \phi_o\!\left(\phi_a(A)+
+  \operatorname{DWConv}_{3\times3}(V)\right), \label{eq:mix}\\
+X' &= X+Z, \label{eq:res1}\\
+X'' &= X'+\phi_2\!\left(\operatorname{SiLU}(\phi_1(X'))\right),
+  \label{eq:res2}
+\end{align}
+with $\phi_k:C\rightarrow d$, $\phi_v:C\rightarrow C$, $\phi_a:d\rightarrow C$
+and $\phi_o:C\rightarrow C$ all $1\times1$ convolutions and
+$d=\max(C/4,8)$; the unprocessed half and $X''$ are concatenated and projected
+as in C2PSA. Three properties matter. The normalization in
+\eqref{eq:chansoftmax} runs over channels at each spatial location, so no
+affinity matrix and no transpose is formed, and the block follows external
+attention in replacing pairwise interaction by projections through a compact
+memory of rank $d$ \cite{guo2023external}. The mixing in \eqref{eq:mix} keeps
+the reference block's positional depthwise convolution on $V$, which is the
+component that supplies local spatial context. Finally, $\phi_k$ and $\phi_v$
+are separate convolutions rather than a fused QKV projection followed by a
+channel slice: the fused form is equivalent in function but exports as a
+\texttt{Slice} chain surrounded by shape helpers, which the compiler places on
+the GPU and which then costs a round trip off the accelerator per scale. The
+price of the substitution is that mixing is no longer data-dependent or
+multi-head; it is a learned low-rank channel mixer gated by a channel softmax.
+
+\subsubsection{DetectDLA}
+DetectDLA leaves training untouched: it uses the original box and class towers
+and the standard rank-three path in training and in ordinary PyTorch inference.
+Only in export mode does it bypass DFL, anchor decoding, sigmoid, and NMS and
+emit one packed tensor per scale according to \eqref{eq:packed}. For COCO
+($n_c=80$, $r=16$) at $640\times640$ the three engine outputs are
+$1\times144\times80\times80$, $1\times144\times40\times40$, and
+$1\times144\times20\times20$, exposed as the bindings \texttt{pred\_p3},
+\texttt{pred\_p4}, \texttt{pred\_p5} ordered by stride. Export metadata records
+the number of raw outputs, the strides, the regression width $r$, the class
+names, and whether the head is one-to-one, so that the host decoder is selected
+from the engine's declared contract instead of being hard-coded.
+
+\subsubsection{Weight-aware initialization}
+Because the edit is localized, most of the reference model transfers directly.
+All shape-compatible parameters outside the substituted block are loaded from a
+task-matched YOLO11 checkpoint. Inside the block, the positional depthwise
+convolution and the output projection are copied verbatim; the per-head
+channel slices of the reference fused QKV projection corresponding to $K$ and
+$V$, together with their batch-normalization statistics, are gathered into
+$\phi_k$ and $\phi_v$ whenever the shapes agree, which for $\phi_k$ requires
+$d$ to equal the reference key width; and $\phi_a$, which has no counterpart in
+the reference, is initialized randomly. Training then proceeds in two phases:
+the layers preceding the substituted block are frozen while the new projection
+adapts, after which the whole model is fine-tuned at a lower learning rate.
+Initialization is part of the method and not an implementation detail, since it
+is what allows a substituted block to approximate a reference block's behavior
+rather than merely occupy its position.
+
+\begin{table}[t]
+\caption{Reference detector and its admissible retrofit. Only the two rows in
+bold differ by construction; every other row is inherited.}
+\label{tab:design}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{p{0.20\columnwidth}p{0.34\columnwidth}p{0.36\columnwidth}}
+\toprule
+Axis & YOLO11n (reference) & YOLO11-DLA-n (retrofit) \\
+\midrule
+Stem, C3k2 stages, SPPF, PAN neck & inherited & identical \\
+\textbf{Terminal backbone stage} & C2PSA, position-sensitive attention with
+two matrix multiplications & C2DLA, rank-$d$ channel-softmax mixer, $1\times1$
+convolutions only \\
+Positional encoding & $3\times3$ depthwise on $V$ & unchanged \\
+Activations & SiLU & unchanged \\
+Box representation & $r=16$ distributional & unchanged \\
+Assignment, losses & task-aligned one-to-many & unchanged \\
+\textbf{Exported interface} & one decoded $1\times84\times8400$ tensor &
+three raw maps, $4r+n_c=144$ channels per scale \\
+Host task logic & NMS & DFL decode, sigmoid, NMS \\
+Initialization & official COCO checkpoint & shape-compatible transfer, block
+hot-start, two-phase fine-tune \\
+Strict DLA build & rejected at the attention \texttt{MatMul} & accepted, one
+loadable, no layer on GPU \\
+\bottomrule
+\end{tabular}
+\end{table}

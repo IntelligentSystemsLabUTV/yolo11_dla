@@ -1,0 +1,43 @@
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=2.6mm and 3.2mm,
+    box/.style={draw, rounded corners=2pt, align=center, minimum height=7.5mm,
+                inner xsep=3pt, font=\scriptsize},
+    kept/.style={box, fill=green!10},
+    sub/.style={box, fill=blue!12, very thick},
+    io/.style={box, fill=gray!12},
+    host/.style={box, fill=orange!16},
+    ar/.style={-{Latex[length=1.6mm]}, thick}
+]
+\node[io] (img) {image\\$1\!\times\!3\!\times\!640^2$};
+\node[kept, right=of img] (bb) {preserved YOLO11\\stem, C3k2, SPPF};
+\node[sub, right=of bb] (mix)
+  {\textbf{S1}: C2PSA\\$\rightarrow$ C2DLA};
+\node[kept, below=5.5mm of bb] (neck) {preserved PAN\\neck (P3--P5)};
+\node[sub, right=of neck] (head) {\textbf{S2}: Detect\\$\rightarrow$ DetectDLA};
+\node[io, right=of head] (maps) {\texttt{pred\_p3/4/5}\\$144\!\times\!\{80,40,20\}^2$};
+\node[host, below=5.5mm of head] (post)
+  {host task logic: sparse DFL, sigmoid, NMS, box scaling};
+
+\draw[ar] (img) -- (bb);
+\draw[ar] (bb) -- (mix);
+\draw[ar] (mix.south) -- ++(0,-2.7mm) -| (neck.north);
+\draw[ar] (neck) -- (head);
+\draw[ar] (head) -- (maps);
+\draw[ar] (maps.south) -- ++(0,-2.7mm) -| (post.north);
+
+\node[draw=blue!65, dashed, rounded corners,
+      fit=(img)(bb)(mix)(neck)(head)(maps), inner sep=3.2pt] (engine) {};
+\node[font=\scriptsize\bfseries, blue!60!black, above=0.4mm of engine.north west,
+      anchor=west] {DLA engine: one loadable, all tensors 4-D, static shapes};
+\end{tikzpicture}%
+}
+\caption{Accelerator boundary and the two substitutions. The learned graph inside the
+dashed region compiles to one DLA loadable in the evaluated configuration.
+Preprocessing, physical-layout conversion, and detection decoding run on the host. S1 removes the
+attention matrix multiplications, S2 removes the rank-three decoded output
+interface. Green blocks are inherited from the reference model unchanged.}
+\label{fig:boundary}
+\end{figure}

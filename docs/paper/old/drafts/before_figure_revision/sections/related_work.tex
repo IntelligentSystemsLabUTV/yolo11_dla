@@ -1,0 +1,58 @@
+\section{Related Work}
+\label{sec:related}
+\paragraph*{Efficient object detection}
+YOLO introduced single-network dense detection \cite{redmon2016yolo}.
+Subsequent detectors refine feature extraction, training, and inference:
+YOLOv7 emphasizes trainable improvements \cite{wang2023yolov7}, and YOLOv10
+studies end-to-end detection without conventional NMS \cite{wang2024yolov10}.
+YOLO-ReT targets real-time detection on edge GPUs
+\cite{ganesh2022yoloret}. Our reference is the Ultralytics YOLO11 software
+implementation \cite{jocher2024yolo11}, with its C3k2 stages, C2PSA block,
+multi-scale neck, and distributional box regression. We retain that regression
+representation, following the distributed bounding-box formulation associated
+with generalized focal loss \cite{li2020gfl}. The target is DLA-compatible
+execution of an existing detector family; the evidence here does not establish
+a new accuracy--speed frontier across detector families.
+
+YOLOBench evaluates YOLO variants under controlled training and across embedded
+hardware \cite{lazarevich2023yolobench}. ActNAS studies activation selection
+for efficient YOLO deployment, including the interaction of ReLU/SiLU choices
+with target hardware and compiler optimizations \cite{sah2025actnas}.
+These comparisons are directly relevant to the retained SiLU operations in
+YOLO11-DLA: an activation's cost and support must be assessed on its compiled
+representation. We preserve SiLU and verify the resulting sigmoid/product
+decomposition on the target, while modifying attention and the output boundary.
+The distinction is architectural and experimental; deployment on a neural
+accelerator alone is not a new contribution.
+
+\paragraph*{Hardware-aware neural networks}
+MnasNet and ProxylessNAS incorporate target-device latency into architecture
+selection \cite{tan2019mnasnet,cai2019proxyless}. Once-for-All supports
+specialization under multiple deployment constraints \cite{cai2020ofa}, and
+MCUNet jointly considers the network and runtime for constrained devices
+\cite{lin2020mcunet}. These works motivate measuring the deployed system
+instead of relying only on operation counts. Our approach uses a manually
+specified adaptation of YOLO11, with strict compilation as a feasibility gate.
+We do not perform architecture search or prove that two substitutions are a
+minimum over all possible executable designs.
+
+\paragraph*{Attention and compatible operators}
+External attention replaces pairwise self-attention with learned projections
+through an external memory \cite{guo2023external}. C2DLA is related through its
+projection--normalization--projection structure, but uses softmax only along
+the channel axis at each spatial position. It does not reproduce external
+attention's complete normalization scheme or aggregate distant image positions.
+Its spatial interaction comes from a local depthwise convolution and the
+inherited backbone. We therefore describe the implemented operation as a
+channel-softmax mixer rather than an equivalent form of spatial attention.
+
+\paragraph*{Compilation and heterogeneous deployment}
+Graph compilers such as TVM fuse and lower neural operators for target hardware
+\cite{chen2018tvm}. TensorRT provides DLA compilation, optional GPU fallback,
+and native tensor formats, subject to documented layer restrictions
+\cite{nvidia_dla_working}. Compiler transformations can resolve some
+source-level incompatibilities, so exported operator counts are explanatory
+rather than a sufficient placement test. Our acceptance criterion combines a
+fallback-disabled build with inspection of the optimized engine. This places
+model structure, exported interface, and compiled placement in the same
+experimental comparison.

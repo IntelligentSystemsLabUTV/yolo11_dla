@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\caption{Deployment latency at the engine and application boundaries, batch one, $640\times640$. All values are milliseconds. Engine measurements include transfers (30\,s); application measurements include preprocessing, native I/O, inference, decode, and NMS on the same 100 images (60\,s).}
+\label{tab:latency}\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lllrrrr@{}}
+\toprule
+& & & \multicolumn{2}{c}{Engine + transfer} & \multicolumn{2}{c}{Application} \\
+\cmidrule(lr){4-5}\cmidrule(l){6-7}
+Model & Device & Mode & Median & P95 & Median & P95 \\
+\midrule
+YOLO11-n & GPU & FP16 & 3.740 & 3.753 & 20.030 & 24.658 \\
+YOLO11-n & DLA+GPU & FP16 & 34.678 & 34.942 & 51.241 & 59.542 \\
+YOLO11-DLA-n & GPU & FP16 & 3.500 & 3.512 & 20.307 & 24.584 \\
+YOLO11-DLA-n & DLA & FP16 & 27.515 & 27.718 & 56.820 & 65.042 \\
+\midrule
+YOLO11-n & GPU & INT8 & 3.021 & 3.030 & 17.556 & 22.104 \\
+YOLO11-n & DLA+GPU & INT8 & 13.068 & 13.094 & 29.020 & 37.510 \\
+YOLO11-DLA-n & GPU & INT8 & 2.828 & 2.836 & 18.212 & 22.467 \\
+YOLO11-DLA-n & DLA & INT8 & 4.167 & 4.173 & 30.675 & 34.812 \\
+\bottomrule
+\end{tabular*}
+\end{table*}

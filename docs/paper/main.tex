@@ -1,0 +1,70 @@
+\documentclass[letterpaper,10pt,conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+
+\usepackage{amsmath,amssymb,booktabs,cite}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx,graphicx,microtype,url}
+\usepackage[dvipsnames]{xcolor}
+
+\newcommand{\model}{YOLO11-DLA-n}
+\title{\LARGE\bf Fallback-Free Is Not Free: Accuracy, Latency, and Energy\\
+Costs of Full DLA Placement for YOLO11}
+
+\author{Anonymous Authors}
+% \author{Alexandru Cretu$^{1}$, Jaleh Farmani$^{1,2}$, Roberto Masocco$^{1}$, Alessandro Tenaglia$^{1}$, Simone Mattogno$^{1}$ and Daniele Carnevale$^{1}$%
+% \thanks{
+%     Corresponding author: {\tt\small roberto.masocco@uniroma2.it}.\hfill\break
+%     $^{1}$Dipartimento di Ingegneria Civile e Ingegneria Informatica,
+%         Università degli Studi di Roma Tor Vergata, Via del Politecnico 1, 00133 Rome, Italy}%
+% }
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\begin{abstract}
+Embedded robots share compute resources across perception, localization,
+mapping, planning, and control. Requesting execution on NVIDIA's Deep Learning
+Accelerator (DLA) can leave learned layers on the GPU. This work asks what it costs to run a modern detector entirely on a
+constrained accelerator. On Jetson AGX Orin, a fully DLA-admissible YOLO11
+executes inference faster than the same network on GPU in INT8 (4.522 versus
+6.400\,ms), yet the native-layout boundaries around it have stage medians of
+7.463 and 10.729\,ms, and the application pipeline ends up slower and slightly more
+energy-hungry.
+Full admissibility requires C2DLA to replace spatial attention with channel softmax and depthwise convolution, together with a static raw prediction boundary for host-side decoding. With TensorRT 10.3, fallback-disabled
+compilation and engine inspection confirm one DLA loadable without GPU-assigned
+learned layers for the nano model in FP16 and mixed INT8 configurations.
+On 4,500 COCO validation images excluded from calibration,
+strict DLA achieves 37.876 AP in FP16 and 35.408 AP in INT8; the corresponding
+adapted GPU engines achieve 37.879 and 35.951 AP. At batch one and
+$640\times640$, INT8 reduces strict DLA median engine-plus-transfer latency
+from 27.515 to 4.167\,ms and application-pipeline latency from 56.820 to
+30.675\,ms. Module energy at 10\,Hz decreases from 0.874 to 0.806\,J/frame.
+The adapted INT8 GPU engine remains faster and lower-energy, at 18.212\,ms
+application-pipeline latency and 0.760\,J/frame. The case study shows that
+DLA compatibility must be evaluated together with accuracy, host-side processing,
+and module energy. Faster accelerator execution alone is not enough to select
+a deployment.
+\end{abstract}
+
+% \begin{keywords}
+% Embedded Systems for Robotic and Automation;
+% Hardware-Software Integration in Robotics;
+% Deep Learning for Visual Perception.
+% \end{keywords}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/deployment}
+\input{sections/evaluation}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

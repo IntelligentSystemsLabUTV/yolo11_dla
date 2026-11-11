@@ -1,0 +1,45 @@
+\section{Export and Runtime}
+\label{sec:deployment}
+\subsection{Exported Graph and Strict Compilation}
+The adapted model is exported with a static $1\times3\times640\times640$ input.
+
+Strict compilation targets DLA core 0 in FP16 and calibrated INT8, with GPU
+fallback disabled and explicit native I/O formats. Optimized-engine inspection
+confirms that each strict engine contains a single DLA node corresponding to
+one loadable. DLA operator support depends on the target and TensorRT version
+\cite{nvidia_dla_working}.
+
+\subsection{Native Layouts and the Host Boundary}
+\label{sec:packing}
+Strict FP16 uses DLA\_HWC4 input and CHW16 outputs; strict INT8 uses
+DLA\_HWC4 input and CHW32 outputs \cite{nvidia_dla_working}.
+GPU and stock DLA+GPU fallback engines retain linear FP16 external bindings
+in both precision modes. For native INT8 bindings, the host uses per-tensor
+scales to quantize input pixels and dequantize raw outputs.
+
+The application runner performs packing, unpacking, and INT8 conversion on the
+CPU. Timed input stages include packing and host-to-device (H2D) transfer;
+output stages include device-to-host (D2H) transfer, unpacking, and any
+dequantization.
+
+\subsection{Confidence-First Host Decoding}
+\label{sec:decode}
+The host splits each $P_\ell$ into 64 regression channels and 80 class channels.
+For confidence threshold $\tau\in(0,1)$, an anchor survives if
+\begin{equation}
+ \sigma\!\left(\max_c S_{\ell,c}(h,w)\right) > \tau.
+ \label{eq:threshold}
+\end{equation}
+For each survivor and box side $q\in\{l,t,r,b\}$, the DFL expectation is
+\begin{equation}
+ \hat d_q=\sum_{j=0}^{r-1}j\,
+ \frac{\exp R_{qj}}{\sum_{k=0}^{r-1}\exp R_{qk}}.
+ \label{eq:dfl}
+\end{equation}
+The decoder places cell centers at $(w+0.5,h+0.5)$, forms the four box
+coordinates from these distances, scales by the level stride, applies class
+sigmoid, and performs class-aware NMS. The final coordinates are mapped back
+through the image's letterbox transform.
+
+Regression decoding is applied only to candidates that pass the confidence
+test; this reduces host decoding work but does not reduce raw-output transfer volume.

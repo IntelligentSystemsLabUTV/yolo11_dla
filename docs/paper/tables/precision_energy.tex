@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Module energy at 10\,Hz, 600 frames per test. Total and idle-subtracted energy: J/frame.}
+\label{tab:energy}\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lllrr@{}}
+\toprule
+Model & Device & Mode & \shortstack{Total\\J/frame} & \shortstack{Idle-subtracted\\J/frame} \\
+\midrule
+YOLO11-n & GPU & FP16 & 0.761 & 0.060 \\
+YOLO11-n & DLA+GPU & FP16 & 0.917 & 0.216 \\
+YOLO11-DLA-n & GPU & FP16 & 0.761 & 0.060 \\
+YOLO11-DLA-n & DLA & FP16 & 0.874 & 0.174 \\
+\midrule
+YOLO11-n & GPU & INT8 & 0.760 & 0.060 \\
+YOLO11-n & DLA+GPU & INT8 & 0.796 & 0.096 \\
+YOLO11-DLA-n & GPU & INT8 & 0.760 & 0.060 \\
+YOLO11-DLA-n & DLA & INT8 & 0.806 & 0.106 \\
+\bottomrule
+\end{tabular*}
+\end{table}

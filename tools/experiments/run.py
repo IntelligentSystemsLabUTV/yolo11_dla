@@ -23,6 +23,7 @@ COMMANDS = {
     'audit': ('analysis/analyze_fp16.py',),
     'extract-checkpoint': ('analysis/extract_checkpoint.py',),
     'check-paper': ('paper/check_paper.py',),
+    'precision-results': ('paper/update_precision_results.py',),
     'train': ('training/train_coco_dla.py',),
     'recover-commands': ('history/recover_commands.py',),
 }

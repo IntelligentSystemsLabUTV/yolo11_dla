@@ -1,0 +1,10 @@
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/boundary.tikz}}
+\caption{\textbf{YOLO11-DLA architecture.} Three backbone scales feed the retained
+ top-down and bottom-up neck, followed by box/class towers at strides 8, 16, and 32.
+ Teal outlines identify the C2DLA substitution and static raw-output interface.
+ The learned graph compiles to one DLA loadable; native-format unpacking and detection
+ post-processing remain on the CPU. Preprocessing and input packing precede the shown graph.}
+\label{fig:boundary}
+\end{figure*}

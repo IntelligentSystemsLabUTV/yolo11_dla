@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "numeric_cells_verified": 104,
+  "configurations_per_table": 8,
+  "pipeline_layout": "two columns, four configurations with paired FP16/INT8 metric groups",
+  "other_tables_layout": "full single-column width",
+  "pdf_pages": 8,
+  "pdf_sha256": "9349b58e79b7157c94b9c616dcae539553a8dea538a0460122fd91dc97cba55d",
+  "horizontal_rules_pt_by_page": {
+    "5": [
+      244.8
+    ],
+    "6": [
+      244.8
+    ],
+    "7": [
+      244.8,
+      504.0
+    ],
+    "8": []
+  }
+}

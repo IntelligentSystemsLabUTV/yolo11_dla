@@ -1,0 +1,58 @@
+\begin{tikzpicture}[x=1cm,y=1cm]
+\path[use as bounding box] (0,-.20) rectangle (17.7,4.13);
+\fill[archGray,rounded corners=3pt] (0,0) rectangle (4.25,3.68);
+\fill[archMint!30,rounded corners=3pt] (4.48,0) rectangle (17.7,3.68);
+\node[arch title] at (.12,3.94) {(a) C2DLA module};
+\node[arch title] at (4.61,3.94) {(b) DLABlock: channel mixing + local context};
+% Macro block: projection, split, one bypass, one residual mixing block.
+\node[arch small] (input) at (1.58,3.44) {Input: $256\times20\times20$};
+\node[arch block,minimum width=1.48cm,minimum height=.38cm] (cv1) at (1.58,2.83) {$1\times1$ Conv};
+\node[arch small] (split) at (1.58,2.27) {Split channels};
+\node[arch edit,minimum width=1.43cm,minimum height=.57cm] (block) at (2.86,1.60) {DLABlock\\$C{=}128,\ d{=}32$};
+\node[arch join] (concat) at (1.58,.98) {C};
+\node[arch block,minimum width=1.48cm,minimum height=.38cm] (cv2) at (1.58,.35) {$1\times1$ Conv};
+\draw[arch flow] (input.south) -- (cv1.north);
+\draw[arch flow] (cv1.south) -- (split.north);
+\draw[arch flow] (split.west) -- (.47,2.27) -- (.47,.98) -- (concat.west);
+\draw[arch flow] (split.east) -- (2.86,2.27) -- (block.north);
+\draw[arch flow] (block.south) -- (2.86,.98) -- (concat.east);
+\draw[arch flow] (concat.south) -- (cv2.north);
+\node[arch small,rotate=90] at (.22,1.70) {128-channel bypass};
+\node[arch small] (output) at (3.45,.35) {Output\\256 channels};
+\draw[arch flow] (cv2.east) -- (output.west);
+% Detailed block: two computational branches, then attention and FFN residuals.
+\node[arch small] (x) at (4.82,1.88) {$X$};
+\node[arch block,minimum width=1.47cm,minimum height=.62cm] (key) at (6.13,2.59) {$1\times1$ Conv\\$C\rightarrow d$};
+\node[arch edit,minimum width=1.52cm,minimum height=.62cm] (softmax) at (8.25,2.59) {Channel\\softmax};
+\node[arch block,minimum width=1.47cm,minimum height=.62cm] (mix) at (10.14,2.59) {$1\times1$ Conv\\$d\rightarrow C$};
+\node[arch block,minimum width=1.47cm,minimum height=.62cm] (value) at (6.13,1.16) {$1\times1$ Conv\\$C\rightarrow C$};
+\node[arch block,minimum width=1.52cm,minimum height=.62cm] (dw) at (8.25,1.16) {$3\times3$ DWConv\\local context};
+\node[arch join] (add) at (11.18,1.88) {$+$};
+\node[arch block,minimum width=1.35cm,minimum height=.62cm] (proj) at (12.40,1.88) {$1\times1$ Conv\\$C\rightarrow C$};
+\node[arch join] (res) at (13.66,1.88) {$+$};
+\node[arch block,minimum width=1.78cm,minimum height=.72cm] (ffn) at (15.25,1.88) {Pointwise FFN\\$C\rightarrow2C\rightarrow C$\\SiLU};
+\node[arch join] (res2) at (16.80,1.88) {$+$};
+\node[arch small] (out) at (17.48,1.88) {$X''$};
+\draw[arch flow] (x.east) -- (5.15,1.88) |- (key.west);
+\draw[arch flow] (5.15,1.88) |- (value.west);
+\draw[arch flow] (key.east) -- (softmax.west);
+\draw[arch flow] (softmax.east) -- (mix.west);
+\draw[arch flow] (value.east) -- (dw.west);
+\draw[arch flow] (mix.east) -| (add.north);
+\draw[arch flow] (dw.east) -| (add.south);
+\draw[arch flow] (add.east) -- (proj.west);
+\draw[arch flow] (proj.east) -- (res.west);
+\draw[arch flow] (res.east) -- (ffn.west);
+\draw[arch flow] (ffn.east) -- (res2.west);
+\draw[arch flow] (res2.east) -- (out.west);
+\draw[arch flow] (5.15,1.88) -- (5.15,3.40) -- (13.66,3.40) -- (res.north);
+\node[arch small,fill=archMint!30] at (11.55,3.40) {Residual};
+\draw[arch flow] (14.00,1.88) -- (14.00,.65) -- (16.80,.65) -- (res2.south);
+\node[arch small,fill=archMint!30] at (15.38,.65) {Residual};
+\node[arch small] at (6.13,2.03) {$\phi_k$};
+\node[arch small] at (8.25,2.03) {$A=\mathrm{softmax}_{\mathrm{ch}}(K)$};
+\node[arch small] at (10.14,2.03) {$\phi_a$};
+\node[arch junction] at (5.15,1.88) {};
+\node[arch junction] at (14.00,1.88) {};
+\node[arch small,anchor=west] at (4.68,.25) {All tensors remain $B\times C\times H\times W$; no spatial affinity matrix or MatMul.};
+\end{tikzpicture}

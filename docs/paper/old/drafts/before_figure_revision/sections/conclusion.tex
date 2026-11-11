@@ -1,0 +1,12 @@
+\section{Conclusion}
+YOLO11-DLA adapts YOLO11 through a channel-softmax/local-convolution replacement
+and a static raw-output interface. The nano instance compiles into one
+fallback-free DLA loadable on the measured Orin/TensorRT stack, where stock
+YOLO11n fails strict compilation. Its 27.515\,ms median engine-plus-transfer
+latency is 20.7\% lower than stock YOLO11n with GPU fallback, while remaining
+7.86 times slower than its own GPU engine. The retained training record reports
+37.581 AP; deployed-engine accuracy is still pending. The contribution is a
+concrete DLA-compatible YOLO11 implementation and an auditable characterization
+of its execution boundary. Dataset validation and concurrent robotics/energy
+experiments will determine when this placement is useful within a complete
+robot system.

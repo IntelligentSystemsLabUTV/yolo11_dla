@@ -5,9 +5,10 @@ import sys
 ROOT = Path(__file__).resolve().parent
 WORKSPACE = ROOT.parents[1]
 TOOLS = WORKSPACE / 'tools'
-PAPER = TOOLS / 'paper'
+DOCS = WORKSPACE / 'docs'
+PAPER = DOCS / 'paper'
 ULTRALYTICS = TOOLS / 'ultralytics'
-ARTIFACTS = PAPER / 'analysis'
+ARTIFACTS = DOCS / 'analysis'
 def configure_imports():
     for path in (ROOT, ROOT/'benchmarks', ROOT/'evaluation', ROOT/'orchestration', ULTRALYTICS):
         if str(path) not in sys.path:

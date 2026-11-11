@@ -2,7 +2,7 @@
 
 ## Where the code lives
 
-YOLO11-DLA is a patch to Ultralytics, not a separate codebase. [`MODEL_PATCH.md`](MODEL_PATCH.md) contains every change required to reproduce it from upstream revision `a462bb65` — the three new blocks, the head, the model YAML, the host decoder, and the export, backend and post-processing hooks — with the parts belonging to other experiments explicitly excluded.
+YOLO11-DLA is a patch to Ultralytics, not a separate codebase. It lives in the Ultralytics fork at <https://github.com/IntelligentSystemsLabUTV/ultralytics> (branch `ICRA`), which the tooling expects at `tools/ultralytics/`: 401 added lines over upstream revision `a462bb65`, listed below.
 
 | Upstream file | Change |
 |---|---|
@@ -14,7 +14,7 @@ YOLO11-DLA is a patch to Ultralytics, not a separate codebase. [`MODEL_PATCH.md`
 | `ultralytics/engine/exporter.py`, `nn/backends/base.py` | binding names and typed export metadata |
 | `ultralytics/models/yolo/detect/{predict,val}.py`, `utils/nms.py` | route raw outputs through the decoder; fix a six-candidate NMS ambiguity |
 
-Applying the patch to a checkout of Ultralytics at `tools/ultralytics/` and putting that path on `PYTHONPATH` is all the experiment tooling needs.
+Cloning that repository to `tools/ultralytics/` and putting the path on `PYTHONPATH` is all the experiment tooling needs.
 
 ## Why stock YOLO11n cannot be placed on DLA
 
@@ -88,7 +88,7 @@ Measurements taken before these fixes were not reused for the sparse path; the r
 
 The nano model is initialized from pretrained `yolo11n.pt`. The loader intersects source and destination state dictionaries by tensor name **and** shape, copies the matching entries and loads them non-strictly (`BaseModel.load` → `intersect_dicts` in the fork). Everything compatible — backbone, neck, detection towers, and the parts of the replacement block that happen to match — is transferred; the rest keeps its model initialization. No QKV remapping and no frozen-backbone stage are involved, and no specialized two-phase recipe was used.
 
-Recorded training configuration, extracted from the checkpoint itself into [`../tools/paper/analysis/checkpoint_training.json`](../tools/paper/analysis/checkpoint_training.json):
+Recorded training configuration, extracted from the checkpoint itself into [`../analysis/checkpoint_training.json`](docs/analysis/checkpoint_training.json):
 
 - COCO train2017, 500 epochs, batch 32, 640×640, seed 0, 8 workers, AMP, `freeze=None`, `nbs=64`, `optimizer=auto`.
 - Base LR 0.01, `lrf=0.01`, momentum 0.9, weight decay 5×10⁻⁴, three warm-up epochs then linear decay; mosaic closed for the last ten epochs.

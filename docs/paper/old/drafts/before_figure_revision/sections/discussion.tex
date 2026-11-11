@@ -1,0 +1,87 @@
+\section{Validation Gaps and Robotics Experiments}
+\label{sec:discussion}
+\subsection{Numerical Correctness of the Deployed Detector}
+The highest-priority experiment is validation through the exact serialized
+strict-DLA engine. A conventional backend that allocates linear buffers from
+logical tensor shapes cannot be assumed to support DLA-native formats. The
+validator must use format-aware allocation and packing, decode raw outputs with
+the same class and coordinate conventions, and preserve the official COCO image
+and category mappings. AP, AP$_{50}$, AP$_{75}$, and small/medium/large-object
+AP should be reported for stock PyTorch, adapted PyTorch, adapted GPU FP16,
+and strict DLA FP16 on the same 5,000 validation images.
+
+Detection validation must retain low-confidence candidates and the evaluator's
+multi-label and maximum-detection settings. The confidence-0.25 visual smoke
+test is not a suitable AP protocol. Numerical checks should first compare raw
+maps and decoded predictions on matched preprocessed inputs, then report
+aggregate AP changes. This separates layout errors from the compiler's softmax
+approximation and ordinary FP16 rounding.
+\missing{P3}{fill strict-engine accuracy, raw-output errors, and decoder parity}.
+
+\subsection{Ablations for the Model and Interface}
+The observed compatibility result combines two changes. A controlled ablation
+should use stock attention or C2DLA, crossed with decoded or raw output. Stock
+attention with raw outputs isolates the attention blocker; C2DLA with decoded
+outputs isolates the export boundary. These controls require fresh compiler
+records rather than predictions based only on source operators. GPU accuracy
+controls remain meaningful even when their strict builds fail.
+
+A second comparison should hold the training schedule fixed while varying
+shape-matched initialization, block-aware transfer, and random initialization
+of the replacement block. At least three seeds would expose sensitivity to the
+new mixer. A convolution-only replacement with comparable capacity would test
+whether channel softmax adds accuracy worth its compiler constraints.
+\missing{P5}{report build outcome, AP, parameters, and timing for these controls}.
+The current single training history cannot isolate those effects or establish
+that C2DLA is an optimal replacement.
+
+\subsection{GPU Contention and Robotic Replay}
+A strict learned graph does not establish isolation of the whole application.
+The CPU, memory controller, power envelope, transfers, and runtime remain shared.
+The first experiment should measure a fixed GPU workload alone and beside each
+perception placement: stock GPU, adapted GPU, stock fallback, and adapted strict
+DLA. For a co-running task with latency quantile $Q_p$, define
+\begin{equation}
+ S_p=\frac{Q_p(L_{\mathrm{co\text{-}running}})}
+             {Q_p(L_{\mathrm{standalone}})}.
+ \label{eq:slowdown}
+\end{equation}
+Report both median and P95 slowdown, perception latency, delivered frame rate,
+and deadline misses. Use independent launches in randomized order, retaining
+per-frame timestamps and clock/temperature traces. A synthetic CUDA workload
+provides a repeatable stress test but does not establish a robotics benefit.
+
+A second experiment should replay a timestamped camera sequence through a ROS~2
+perception node \cite{macenski2022ros2}, alongside a specified GPU mapping or
+navigation component. Keep image order, frame-release times, queue capacity, and
+drop policy fixed across placements. Report acquisition-to-result latency,
+queue delay, dropped frames, perception deadline misses, and co-running-task
+slowdown. Compute service time alone omits the delay that a controller observes.
+\missing{P6}{insert measured contention and robotic-replay results}.
+
+\subsection{Energy at a Matched Delivered Rate}
+DLA placement may change power, but longer execution and additional host work
+can offset a lower device power level. Energy must therefore be integrated over
+the same measured interval as completed frames:
+\begin{equation}
+ E_{\mathrm{frame}}=\frac{\int_{t_0}^{t_1}P_{\mathrm{board}}(t)\,dt}
+ {N_{\mathrm{completed}}}.
+ \label{eq:energy}
+\end{equation}
+Report total board energy and, separately, idle-subtracted energy using an idle
+measurement under the same power mode and clock policy. Compare placements at
+a common delivered rate that all can sustain, as well as under saturation;
+otherwise a lower frame count can obscure the comparison. Record the rail
+being sampled, its sampling interval, and alignment with runtime timestamps.
+Avoid adding overlapping board and component power rails.
+\missing{P7}{insert power, joules/frame, achieved rate, and repeat variability}.
+
+\subsection{Limits of the Present Evidence}
+The hardware evidence covers one Orin configuration, TensorRT 10.3, FP16, one
+input resolution, and one detector scale. It establishes neither INT8 behavior
+nor portability across DLA generations. Generated-input microbenchmarks exclude
+content-dependent host decoding; the provisional repeated-image experiment
+samples only one scene. No claim of energy savings, global GPU isolation,
+hard real-time behavior, or accuracy preservation follows from strict
+compilation alone. These limits define what the additional experiments must
+resolve rather than changing the compatibility result already observed.
