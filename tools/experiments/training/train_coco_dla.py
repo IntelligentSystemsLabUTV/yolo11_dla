@@ -78,6 +78,14 @@ MODELS = {
         wandb_run_id="yolo11s_dla_coco2017",
         pretrained=WORKSPACE / "yolo11s.pt",
     ),
+    "yolo11m-dla": ModelSpec(
+        source=MODEL_CONFIGS / "11" / "yolo11m-dla.yaml",
+        data=WORKSPACE / "tools" / "datasets" / "coco-bbox.yaml",
+        project=RUNS / "detect",
+        run_name="coco-yolo11m-dla",
+        wandb_run_id="yolo11m_dla_coco2017",
+        pretrained=WORKSPACE / "yolo11m.pt",
+    ),
     "yolo11n-dla-seg": ModelSpec(
         source=MODEL_CONFIGS / "11" / "yolo11-dla-seg.yaml",
         data=WORKSPACE / "tools" / "datasets" / "coco-seg.yaml",
@@ -152,6 +160,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--batch", type=int, default=32, help="Images per batch; use -1 for automatic sizing.")
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument("--data", type=Path, help="Dataset YAML (default: the model's dataset config).")
     parser.add_argument("--device", default="0")
     parser.add_argument(
         "--wandb-run-id",
@@ -198,8 +207,7 @@ def install_graceful_stop(model: YOLO) -> None:
 def main() -> None:
     args = parse_args()
     spec = MODELS[args.model]
-    if not spec.data.exists():
-        raise FileNotFoundError(f"Dataset config is missing: {spec.data}")
+    data = args.data or spec.data
     if not model_source_exists(spec.source):
         raise FileNotFoundError(f"Model is missing: {spec.source}")
     if spec.pretrained is not None and not spec.pretrained.exists():
@@ -213,6 +221,8 @@ def main() -> None:
 
     resume_checkpoint = None if args.fresh else newest_resumable_checkpoint(spec)
     if resume_checkpoint is not None:
+        if args.data is not None:
+            raise ValueError("Resume uses the checkpoint dataset. Omit --data, or use --fresh for a new run.")
         target = f"epoch {args.epochs}" if args.epochs is not None else "the checkpoint target epoch"
         print(
             f"Resuming {args.model} from {resume_checkpoint} up to {target}.",
@@ -233,6 +243,8 @@ def main() -> None:
         model.train(**train_args)
         return
 
+    if not data.exists():
+        raise FileNotFoundError(f"Dataset config is missing: {data}. Supply an existing YAML with --data.")
     epochs = args.epochs if args.epochs is not None else DEFAULT_EPOCHS
     print(f"Starting fresh {args.model} run from {spec.source} for {epochs} epochs.", flush=True)
     model = build_model(spec.source)
@@ -241,7 +253,7 @@ def main() -> None:
         model.load(str(spec.pretrained))
     install_graceful_stop(model)
     model.train(
-        data=str(spec.data),
+        data=str(data),
         epochs=epochs,
         imgsz=640,
         batch=args.batch,

@@ -1,0 +1,27 @@
+name: yolo-dla-train
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.12
+  - pip
+  - setuptools>=70
+  - wheel
+  - git
+  - git-lfs
+
+  - pip:
+      # CUDA 13 ARM64 wheels from PyPI
+      - "torch>=2.11,<2.12"
+      - "torchvision>=0.26,<0.27"
+
+      # Install this repository's modified Ultralytics checkout
+      - -e ./tools/ultralytics
+
+      # Required by tools/train_coco_dla.py
+      - "wandb>=0.19"
+
+      # Useful training/COCO extras
+      - "albumentations>=1.4.6"
+      - "faster-coco-eval>=1.6.7"
